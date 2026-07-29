@@ -92,12 +92,17 @@
 <body>
 <div class="wrap">
 
-  <header style="margin-bottom:1.2rem">
-    <span class="pill">SON-514 · Unidad 5 · Análisis de datos</span>
-    <h1>Taller de análisis de datos</h1>
-    <p class="sub">Analizamos los datos que generó el propio curso. Cada resultado se puede desplegar
-      para ver <b style="color:var(--txt)">cómo se calcula</b>: la fórmula, los números intermedios y
-      cómo se lee.</p>
+  <header style="margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:flex-start; gap:1rem">
+    <div>
+      <span class="pill">SON-514 · Unidad 5 · Análisis de datos</span>
+      <h1>Taller de análisis de datos</h1>
+      <p class="sub">Analizamos los datos que generó el propio curso. Cada resultado se puede desplegar
+        para ver <b style="color:var(--txt)">cómo se calcula</b>: la fórmula, los números intermedios y
+        cómo se lee.</p>
+    </div>
+    <a href="index.html" style="text-decoration:none; flex:none">
+      <button class="btn sm" style="margin-top:.2rem">← Volver al inicio</button>
+    </a>
   </header>
 
   <!-- ============ 1. DATOS ============ -->
@@ -221,6 +226,12 @@
 <script src="estadistica.js"></script>
 <script>
 'use strict';
+// Protección con contraseña
+if(!localStorage.getItem('son514:analisis_ok')){
+  const pwd=prompt('Contraseña para acceder al taller de análisis:','');
+  if(pwd==='CPZT2022'){ localStorage.setItem('son514:analisis_ok','1'); }
+  else{ alert('Acceso denegado'); window.location.href='index.html'; }
+}
 const E = window.Estad;
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];

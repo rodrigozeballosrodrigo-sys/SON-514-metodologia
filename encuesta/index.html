@@ -526,13 +526,21 @@ function duracionTotal(){
   return Math.round(s/60);
 }
 
+/* ---- protección con contraseña ---- */
+function pedirContrasena(funcion){
+  const pwd=prompt('Contraseña para acceso restringido:','');
+  if(pwd==='CPZT2022'){ funcion(); }
+  else if(pwd!==null){ alert('Contraseña incorrecta'); location.hash='#'; }
+  else location.hash='#';
+}
+
 /* ---- ruteo ---- */
 function ruta(){
   const h = location.hash.replace('#','');
   $('#home').classList.toggle('hidden', h==='docente'||h==='responder');
   $('#docente').classList.toggle('hidden', h!=='docente');
   $('#alumno').classList.toggle('hidden', h!=='responder');
-  if(h==='docente') initDocente();
+  if(h==='docente') pedirContrasena(initDocente);
   if(h==='responder') initAlumno();
 }
 addEventListener('hashchange', ruta);
