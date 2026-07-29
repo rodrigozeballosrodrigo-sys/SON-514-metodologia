@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SON-514 · Encuesta diagnóstica</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#131a30; --line:#2a3559; --txt:#eef2ff; --dim:#93a0c8;
+    --acc:#5b8cff; --acc2:#22d3ee; --ok:#34d399; --warn:#fbbf24; --danger:#f87171;
+    --f: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    background:radial-gradient(1200px 800px at 20% -10%, #1b2547 0%, var(--bg) 55%);
+    color:var(--txt); font-family:var(--f); -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+  a{color:var(--acc2)}
+  button{font-family:inherit}
+  .hidden{display:none !important}
+
+  .btn{
+    border:1px solid var(--line); background:linear-gradient(180deg,#233059,#1a2444);
+    color:var(--txt); padding:.7rem 1.1rem; border-radius:.7rem; font-size:1rem;
+    cursor:pointer; font-weight:600; transition:.15s; white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--acc)}
+  .btn:disabled{opacity:.4; cursor:not-allowed}
+  .btn.primary{background:linear-gradient(180deg,#3b6ef5,#2a54c9); border-color:#4d7dff}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:.45rem .8rem; font-size:.85rem}
+  .btn.big{padding:1rem 1.4rem; font-size:1.1rem; width:100%}
+  .pill{
+    display:inline-block; padding:.25rem .7rem; border-radius:999px; font-size:.72rem;
+    background:#1e2a4d; border:1px solid var(--line); color:var(--dim); font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase;
+  }
+  .pill.lento{background:#3a2c14; border-color:#7a5a1e; color:var(--warn)}
+  .pill.rapido{background:#12304a; border-color:#1d5b7a; color:var(--acc2)}
+
+  /* ---------- home ---------- */
+  #home{height:100%; display:grid; place-items:center; padding:1.5rem; overflow-y:auto}
+  .card{
+    background:linear-gradient(180deg, rgba(24,34,64,.92), rgba(19,26,48,.92));
+    border:1px solid var(--line); border-radius:1.2rem; padding:clamp(1.3rem,4vw,2rem);
+    max-width:640px; width:100%; box-shadow:0 30px 80px rgba(0,0,0,.5);
+  }
+  .card h1{margin:.2rem 0 .3rem; font-size:clamp(1.3rem,4.5vw,1.6rem); letter-spacing:-.02em}
+  .card .sub{color:var(--dim); font-size:.95rem; margin-bottom:1.5rem; line-height:1.5}
+  .choice{display:grid; gap:.8rem}
+  .choice a{
+    display:block; text-decoration:none; color:var(--txt); border:1px solid var(--line);
+    background:#141d38; padding:1.1rem 1.3rem; border-radius:.9rem; transition:.15s;
+  }
+  .choice a:hover{border-color:var(--acc); background:#182246}
+  .choice b{display:block; font-size:1.1rem; margin-bottom:.15rem}
+  .choice span{color:var(--dim); font-size:.88rem}
+
+  /* ---------- docente ---------- */
+  #docente{height:100%; display:grid; grid-template-columns:340px 1fr}
+  #panel{
+    background:var(--bg2); border-right:1px solid var(--line); padding:1.1rem;
+    overflow-y:auto; display:flex; flex-direction:column; gap:.8rem;
+    padding-bottom:calc(1.1rem + var(--safe-b));
+  }
+  #panel h2{margin:0; font-size:1rem}
+  .codebox{background:#0d142b; border:1px dashed var(--line); border-radius:.8rem; padding:.9rem; text-align:center}
+  .codebox .code{font-size:1.5rem; font-weight:800; letter-spacing:.18em; color:var(--acc2); margin:.2rem 0 .1rem}
+  .codebox .url{font-size:.68rem; color:var(--dim); word-break:break-all; line-height:1.4}
+  #qr{margin:.6rem auto 0; display:block; border-radius:.5rem; background:#fff; padding:6px; width:128px; height:128px}
+  .qlist{display:flex; flex-direction:column; gap:.3rem}
+  .qitem{
+    display:flex; align-items:center; gap:.55rem; padding:.5rem .6rem; border-radius:.6rem;
+    border:1px solid transparent; cursor:pointer; font-size:.83rem; color:var(--dim); transition:.12s;
+  }
+  .qitem:hover{background:#1b2545; color:var(--txt)}
+  .qitem.active{background:#20305e; border-color:var(--acc); color:#fff}
+  .qitem.done{color:#5d6b93}
+  .qitem .n{flex:none; width:22px; height:22px; border-radius:6px; background:#243055; display:grid; place-items:center; font-size:.68rem; font-weight:700}
+  .qitem.done .n{background:#1c6b4d; color:#d1fae5}
+  .qitem.active .n{background:var(--acc); color:#fff}
+  .qitem .t{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .qitem .mk{flex:none; font-size:.62rem; opacity:.75}
+  .bloque{font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:#5d6b93; margin:.6rem 0 .1rem; font-weight:700}
+  .ctrls{display:grid; grid-template-columns:1fr 1fr; gap:.5rem}
+  .ctrls .btn{width:100%; text-align:center}
+  .stat{display:flex; justify-content:space-between; font-size:.8rem; color:var(--dim); padding:.25rem 0}
+  .stat b{color:var(--txt)}
+  hr{border:0; border-top:1px solid var(--line); margin:.25rem 0}
+
+  #panelToggle{
+    display:none; position:absolute; top:.8rem; left:.8rem; z-index:35;
+    width:44px; height:44px; border-radius:.7rem; background:#1a2444cc; backdrop-filter:blur(6px);
+    border:1px solid var(--line); color:var(--txt); font-size:1.2rem; cursor:pointer;
+    place-items:center;
+  }
+  #backdrop{display:none; position:fixed; inset:0; background:#0006; z-index:30}
+  #backdrop.show{display:block}
+
+  /* ---------- proyección ---------- */
+  #stage{position:relative; overflow:hidden; display:flex; flex-direction:column}
+  #stageHead{padding:clamp(1rem,2.5vw,1.7rem) clamp(1rem,3vw,2rem) .6rem; position:relative; z-index:3; pointer-events:none}
+  #stageHead .pill{pointer-events:auto}
+  #qTexto{font-size:clamp(1.35rem,3.3vw,2.6rem); font-weight:800; letter-spacing:-.03em; margin:.5rem 0 .2rem; line-height:1.15; max-width:24ch}
+  #qHint{color:var(--dim); font-size:clamp(.85rem,1.5vw,1rem)}
+  #balloons{position:absolute; inset:0; z-index:1}
+  .balloon{
+    position:absolute; border-radius:999px; display:grid; place-items:center; text-align:center;
+    font-weight:700; will-change:transform; overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 -8px 20px rgba(0,0,0,.15);
+    transition:opacity .5s; line-height:1.12;
+  }
+  .balloon > span{display:block; max-width:100%; overflow-wrap:break-word; word-break:normal; hyphens:none}
+  .balloon .cnt{display:block; font-size:.62em; font-weight:800; opacity:.75; margin-top:.15em}
+  #empty{
+    position:absolute; inset:0; display:grid; place-items:center; z-index:2;
+    color:#4a5678; font-size:1.05rem; pointer-events:none; text-align:center; padding:2rem;
+  }
+  #privado{
+    position:absolute; inset:0; display:none; place-items:center; z-index:2; text-align:center; padding:2rem;
+  }
+  #privado.show{display:grid}
+  #privado .lock{font-size:3.5rem; margin-bottom:.6rem}
+  #privado p{color:var(--dim); max-width:34ch; margin:.3rem auto; line-height:1.5}
+  #contador{position:absolute; right:clamp(1rem,2.5vw,2rem); bottom:calc(clamp(1rem,2.5vw,1.6rem) + var(--safe-b)); z-index:3; text-align:right}
+  #contador .big{font-size:clamp(2rem,5vw,3rem); font-weight:800; line-height:1; color:var(--acc2)}
+  #contador .lbl{font-size:.75rem; color:var(--dim); text-transform:uppercase; letter-spacing:.1em}
+
+  /* aviso ético en la proyección */
+  #avisoProy{position:absolute; inset:0; z-index:4; display:none; place-items:center; padding:clamp(1.2rem,4vw,3rem)}
+  #avisoProy.show{display:grid}
+  .avisoCard{
+    background:linear-gradient(180deg,#182240,#131a30); border:1px solid var(--line);
+    border-radius:1.2rem; padding:clamp(1.4rem,4vw,2.6rem); max-width:760px; text-align:center;
+  }
+  .avisoCard .ic{font-size:clamp(2.4rem,7vw,3.4rem)}
+  .avisoCard h2{font-size:clamp(1.2rem,3.2vw,2rem); margin:.5rem 0 1rem; letter-spacing:-.02em}
+  .avisoCard p{color:var(--dim); font-size:clamp(.95rem,1.8vw,1.15rem); line-height:1.6; margin:.6rem 0}
+  .avisoCard b{color:var(--txt)}
+
+  /* ---------- estudiante ---------- */
+  #alumno{height:100%; display:flex; flex-direction:column; padding:1.1rem; max-width:600px; margin:0 auto; overflow-y:auto; padding-bottom:calc(1.1rem + var(--safe-b))}
+  #aHead{display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.8rem; flex:none}
+  #aBody{flex:1; display:flex; flex-direction:column; justify-content:center; gap:1rem; padding:.8rem 0}
+  #aTexto{font-size:clamp(1.25rem,5.5vw,1.6rem); font-weight:800; letter-spacing:-.02em; line-height:1.25}
+  #aHint{color:var(--dim); font-size:.9rem; margin-top:-.5rem}
+  .inp{
+    width:100%; background:#0f1730; border:1px solid var(--line); color:var(--txt);
+    padding:1rem; border-radius:.8rem; font-size:1.1rem; font-family:inherit;
+  }
+  .inp:focus{outline:none; border-color:var(--acc)}
+  .opts{display:grid; gap:.55rem}
+  .opt{
+    border:1px solid var(--line); background:#131c38; padding:.9rem 1rem; border-radius:.8rem;
+    cursor:pointer; font-size:1.02rem; transition:.12s; display:flex; align-items:center; gap:.7rem;
+  }
+  .opt:hover{border-color:var(--acc)}
+  .opt.sel{background:#23407f; border-color:var(--acc)}
+  .opt .bx{flex:none; width:22px; height:22px; border-radius:6px; border:2px solid var(--line); display:grid; place-items:center; font-size:.78rem}
+  .opt.sel .bx{background:var(--acc); border-color:var(--acc)}
+  .chk{display:flex; align-items:center; gap:.7rem; padding:.9rem 1rem; border:1px solid var(--line); border-radius:.8rem; background:#131c38; cursor:pointer; font-size:.98rem}
+  .chk.sel{background:#23407f; border-color:var(--acc)}
+  .chk .bx{flex:none; width:22px; height:22px; border-radius:6px; border:2px solid var(--line); display:grid; place-items:center; font-size:.78rem}
+  .chk.sel .bx{background:var(--acc); border-color:var(--acc)}
+  .wait{text-align:center; color:var(--dim); padding:2.5rem 1rem}
+  .wait .dot{display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--acc); margin:0 3px; animation:b 1.2s infinite}
+  .wait .dot:nth-child(2){animation-delay:.2s} .wait .dot:nth-child(3){animation-delay:.4s}
+  @keyframes b{0%,60%,100%{opacity:.25; transform:translateY(0)}30%{opacity:1; transform:translateY(-6px)}}
+  .ok{text-align:center; padding:2.2rem 1rem}
+  .ok .big{font-size:3.2rem}
+  .nota{font-size:.82rem; color:var(--dim); line-height:1.5; background:#111a33; border:1px solid var(--line); border-radius:.7rem; padding:.8rem .9rem}
+
+  #modo{position:fixed; left:.8rem; bottom:calc(.8rem + var(--safe-b)); z-index:50; font-size:.68rem; color:var(--dim); background:rgba(11,16,32,.85); border:1px solid var(--line); padding:.3rem .65rem; border-radius:999px}
+  #modo.local{border-color:var(--warn); color:var(--warn)}
+  #toast{position:fixed; left:50%; bottom:calc(1.5rem + var(--safe-b)); transform:translateX(-50%) translateY(200%); z-index:60; background:#1c2748; border:1px solid var(--acc); padding:.8rem 1.2rem; border-radius:.7rem; transition:.35s; font-size:.9rem; max-width:90vw; text-align:center}
+  #toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1024px){
+    #docente{grid-template-columns:1fr}
+    #panel{
+      position:fixed; top:0; left:0; bottom:0; width:min(86vw,340px); z-index:40;
+      transform:translateX(-100%); transition:transform .25s ease; box-shadow:0 0 60px #0009;
+    }
+    #panel.abierto{transform:none}
+    #panelToggle{display:grid}
+    #stageHead{padding-left:4.2rem}
+  }
+  @media (max-width:520px){
+    #qTexto{max-width:100%}
+    #contador{right:1rem}
+    #contador .big{font-size:2rem}
+    .ctrls{grid-template-columns:1fr 1fr}
+  }
+  /* pantallas altas / verticales: el enunciado ocupa proporcionalmente más */
+  @media (orientation:portrait){
+    #stageHead{padding-top:clamp(3.4rem,7vw,4.4rem)}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HOME ============ -->
+<div id="home">
+  <div class="card">
+    <span class="pill">SON-514 · Metodología de la Investigación</span>
+    <h1>Encuesta diagnóstica en vivo</h1>
+    <p class="sub">Carrera de Ingeniería de Sonido · UNITEPC<br>
+      Los datos que se recolecten hoy son el insumo de la práctica del miércoles.</p>
+    <div class="choice">
+      <a href="#docente"><b>Soy el docente</b><span>Panel de control + pantalla de proyección</span></a>
+      <a href="#responder"><b>Soy estudiante</b><span>Responder desde mi teléfono</span></a>
+      <a href="analisis.html"><b>Taller de análisis</b><span>Descriptivas, cruce de variables y estadística aplicada — para la clase del miércoles</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DOCENTE ============ -->
+<div id="docente" class="hidden">
+  <div id="backdrop"></div>
+  <aside id="panel">
+    <h2>Panel de control</h2>
+    <div class="codebox">
+      <div style="font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">Código de sesión</div>
+      <div class="code" id="codigo">----</div>
+      <div class="url" id="urlAlumno">—</div>
+      <img id="qr" alt="Código QR para estudiantes">
+    </div>
+
+    <div class="ctrls">
+      <button class="btn primary" id="btnLanzar">▶ Lanzar</button>
+      <button class="btn" id="btnCerrar">⏸ Cerrar</button>
+      <button class="btn ghost sm" id="btnPrev">← Anterior</button>
+      <button class="btn ghost sm" id="btnNext">Siguiente →</button>
+    </div>
+    <button class="btn sm ghost" id="btnAviso">⚠ Mostrar aviso ético</button>
+
+    <hr>
+    <div class="stat"><span>Conectados</span><b id="nConn">0</b></div>
+    <div class="stat"><span>Respuestas</span><b id="nResp">0</b></div>
+    <div class="stat"><span>Estado</span><b id="estadoTxt">en espera</b></div>
+    <div class="stat"><span>Tiempo en pregunta</span><b id="crono">0:00</b></div>
+    <div class="stat"><span>Duración estimada</span><b id="estimado">—</b></div>
+    <hr>
+
+    <div class="qlist" id="qlist"></div>
+
+    <hr>
+    <button class="btn sm" id="btnCSV">⤓ Exportar CSV (ancho)</button>
+    <button class="btn sm" id="btnJSON">⤓ Exportar JSON (crudo)</button>
+    <a class="btn sm" href="analisis.html" target="_blank" style="text-decoration:none;text-align:center;color:var(--txt)">📊 Taller de análisis</a>
+    <button class="btn sm ghost" id="btnReset" style="color:var(--danger);border-color:#5b2b2b">⟲ Reiniciar sesión</button>
+  </aside>
+
+  <main id="stage">
+    <button id="panelToggle" aria-label="Abrir panel">☰</button>
+    <div id="stageHead">
+      <span class="pill" id="qBloque">—</span>
+      <span class="pill" id="qRitmo" style="display:none"></span>
+      <div id="qTexto">Presioná “Lanzar” para comenzar</div>
+      <div id="qHint"></div>
+    </div>
+    <div id="balloons"></div>
+    <div id="empty">Las respuestas aparecerán acá en tiempo real</div>
+    <div id="privado">
+      <div>
+        <div class="lock">🔒</div>
+        <p><b style="color:var(--txt)">Esta respuesta no se proyecta.</b></p>
+        <p>Por tratarse de información personal, las respuestas quedan solo en el registro
+           de la materia y no se muestran en pantalla.</p>
+      </div>
+    </div>
+    <div id="contador"><div class="big" id="cBig">0</div><div class="lbl">respuestas</div></div>
+
+    <div id="avisoProy">
+      <div class="avisoCard">
+        <div class="ic">🔒</div>
+        <h2>Antes de empezar</h2>
+        <p>Las respuestas que emitas son de <b>uso exclusivamente académico para esta materia</b>.
+           No se usarán de ninguna otra manera.</p>
+        <p>Serviran para construir, entre todos, el ejercicio de la clase del miércoles.</p>
+        <p>Al final se te pedirá tu nombre, y vas a poder <b>elegir quedar en el anonimato</b>.</p>
+        <p style="font-size:.9em;opacity:.75">Las preguntas sobre ingresos y datos personales
+           no se proyectan en pantalla.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ ALUMNO ============ -->
+<div id="alumno" class="hidden">
+  <div id="aHead">
+    <span class="pill" id="aBloque">SON-514</span>
+    <span class="pill" id="aProg">—</span>
+  </div>
+  <div id="aBody"></div>
+</div>
+
+<div id="modo" class="hidden"></div>
+<div id="toast"></div>
+
+<script type="module">
+/* =====================================================================
+   SON-514 · Encuesta diagnóstica en vivo
+   MODO EN VIVO  → con CONFIG_FIREBASE completo (varios dispositivos)
+   MODO LOCAL    → sin configurar nada (pestañas del mismo navegador)
+   ===================================================================== */
+
+const CONFIG_FIREBASE = {
+  apiKey:            "",
+  authDomain:        "",
+  databaseURL:       "",
+  projectId:         "",
+  storageBucket:     "",
+  messagingSenderId: "",
+  appId:             ""
+};
+
+/* ---------------------------------------------------------------------
+   PREGUNTAS
+   tipo    : texto | numero | opcion | multi | nombre
+   ritmo   : 'rapida' (se lanza y se pasa) | 'comentada' (se discuten los globos)
+   seg     : segundos sugeridos
+   privada : true  → no se proyecta (solo queda en el registro)
+   depende : {id, distintoDe} → solo aplica si esa respuesta previa difiere del valor
+   --------------------------------------------------------------------- */
+const PREGUNTAS = [
+  // ── Bloque A · Datos generales ─────────────────────────────────────
+  { id:'edad', bloque:'Datos generales', tipo:'numero', ritmo:'rapida', seg:30,
+    texto:'¿Qué edad tenés?', hint:'Solo el número', min:15, max:80 },
+
+  { id:'trabaja', bloque:'Datos generales', tipo:'opcion', ritmo:'rapida', seg:30,
+    texto:'¿Trabajás actualmente?',
+    opciones:['No, solo estudio','Sí, en algo de sonido','Sí, en otra área'] },
+
+  { id:'donde_trabaja', bloque:'Datos generales', tipo:'texto', ritmo:'rapida', seg:35,
+    texto:'¿Dónde trabajás?', hint:'Rubro o lugar, en pocas palabras', max:30,
+    depende:{ id:'trabaja', distintoDe:'No, solo estudio' } },
+
+  { id:'ingresos', bloque:'Datos generales', tipo:'opcion', ritmo:'rapida', seg:30, privada:true,
+    texto:'¿En qué rango están tus ingresos mensuales?',
+    hint:'Rangos amplios · podés no responder · esta respuesta no se proyecta',
+    ordinal:true, sinOrden:['Prefiero no responder'],
+    opciones:['Menos de Bs 1.500','Bs 1.500 – 3.000','Bs 3.000 – 5.000','Bs 5.000 – 8.000','Más de Bs 8.000','Prefiero no responder'],
+    depende:{ id:'trabaja', distintoDe:'No, solo estudio' } },
+
+  { id:'colegio', bloque:'Datos generales', tipo:'texto', ritmo:'rapida', seg:30,
+    texto:'¿De qué colegio saliste?', hint:'Nombre corto', max:30 },
+
+  { id:'colegio_anio', bloque:'Datos generales', tipo:'numero', ritmo:'rapida', seg:25,
+    texto:'¿En qué año egresaste del colegio?', hint:'Ej. 2019', min:1970, max:2026 },
+
+  { id:'colegio_tipo', bloque:'Datos generales', tipo:'opcion', ritmo:'rapida', seg:25,
+    texto:'¿Era particular o fiscal?', opciones:['Fiscal','Particular','De convenio'] },
+
+  { id:'otra_profesion', bloque:'Datos generales', tipo:'opcion', ritmo:'rapida', seg:25,
+    texto:'¿Tenés otra profesión u oficio?', opciones:['No','Sí'] },
+
+  { id:'cual_profesion', bloque:'Datos generales', tipo:'texto', ritmo:'rapida', seg:30,
+    texto:'¿Cuál?', hint:'En pocas palabras', max:30,
+    depende:{ id:'otra_profesion', distintoDe:'No' } },
+
+  // ── Bloque B · Situación personal ──────────────────────────────────
+  { id:'vivienda', bloque:'Situación personal', tipo:'opcion', ritmo:'rapida', seg:30,
+    texto:'¿Con quién vivís?',
+    opciones:['Solo/a','Con mis papás','Con mi pareja / familia propia','Con amigos o compartiendo','Con otros familiares'] },
+
+  { id:'familia', bloque:'Situación personal', tipo:'multi', ritmo:'rapida', seg:35, max_sel:3,
+    texto:'¿Ya tenés familia propia?', hint:'Podés marcar más de una',
+    opciones:['Todavía no','Tengo pareja','Casado/a','Tengo hijos'] },
+
+  { id:'personas_cuidado', bloque:'Situación personal', tipo:'numero', ritmo:'rapida', seg:30, privada:true,
+    texto:'¿Cuántas personas están a tu cuidado?',
+    hint:'Poné 0 si ninguna · esta respuesta no se proyecta', min:0, max:20 },
+
+  { id:'tiempo_uni', bloque:'Situación personal', tipo:'opcion', ritmo:'rapida', seg:30,
+    texto:'¿Cuánto tardás en llegar a la universidad?',
+    ordinal:true, opciones:['Menos de 15 min','Entre 15 y 30 min','Entre 30 min y 1 hora','Más de 1 hora'] },
+
+  // ── Bloque C · Tecnología e IA ─────────────────────────────────────
+  { id:'que_ias', bloque:'Tecnología e IA', tipo:'multi', ritmo:'rapida', seg:45, max_sel:4,
+    texto:'¿Qué herramientas de IA usás?', hint:'Marcá todas las que uses',
+    opciones:['ChatGPT','Claude','Gemini','Copilot','DeepSeek','Perplexity','Alguna de audio/música','Ninguna'] },
+
+  { id:'uso_ia', bloque:'Tecnología e IA', tipo:'texto', ritmo:'comentada', seg:100,
+    texto:'¿Para qué usás la IA en tu día a día?', hint:'En pocas palabras — sé honesto/a', max:40 },
+
+  { id:'copiar_pegar', bloque:'Tecnología e IA', tipo:'opcion', ritmo:'comentada', seg:100,
+    texto:'Cuando le pedís algo a una IA, ¿copiás y pegás o te detenés a leer?',
+    hint:'No hay respuesta correcta — nos sirve para arrancar la materia',
+    opciones:['Copio y pego directo','Leo por encima y pego','Leo todo y reescribo','Depende de la urgencia'] },
+
+  // ── Bloque D · Cultura y consumo ───────────────────────────────────
+  { id:'generos', bloque:'Cultura y consumo', tipo:'multi', ritmo:'rapida', seg:45, max_sel:3,
+    texto:'¿Qué géneros musicales preferís?', hint:'Hasta 3',
+    opciones:['Rock','Metal','Pop','Hip hop / Rap','Electrónica','Jazz','Clásica','Folklore','Cumbia','Reggaetón','Salsa / Tropical','Otro'] },
+
+  { id:'musico', bloque:'Cultura y consumo', tipo:'opcion', ritmo:'rapida', seg:25,
+    texto:'¿Sos músico?', opciones:['Sí, toco un instrumento','Sí, canto','Sí, produzco','No'] },
+
+  { id:'ultimo_libro', bloque:'Cultura y consumo', tipo:'texto', ritmo:'rapida', seg:45,
+    texto:'¿Cuál fue el último libro que leíste?', hint:'Título corto · vale "ninguno"', max:36 },
+
+  { id:'ultimo_concierto', bloque:'Cultura y consumo', tipo:'texto', ritmo:'rapida', seg:40,
+    texto:'¿A qué concierto fuiste por última vez?', hint:'Nombre corto', max:32 },
+
+  { id:'concierto_morir', bloque:'Cultura y consumo', tipo:'texto', ritmo:'comentada', seg:90,
+    texto:'¿A qué concierto tenés que ir sí o sí antes de morir?', hint:'Sin límites — soñá', max:32 },
+
+  { id:'teatro', bloque:'Cultura y consumo', tipo:'opcion', ritmo:'rapida', seg:25,
+    texto:'¿Vas al teatro?', ordinal:true, opciones:['Nunca','Alguna vez','Varias veces al año','Seguido'] },
+
+  { id:'clasica', bloque:'Cultura y consumo', tipo:'opcion', ritmo:'rapida', seg:25,
+    texto:'¿Vas a conciertos de música clásica?', ordinal:true, opciones:['Nunca','Alguna vez','Varias veces al año','Seguido'] },
+
+  { id:'entradas', bloque:'Cultura y consumo', tipo:'opcion', ritmo:'rapida', seg:35,
+    texto:'Hablando en general: entre estudiantes de sonido, ¿qué se estila más?',
+    hint:'En tercera persona, sin culpas',
+    opciones:['Buscar el pase libre','Depende del bolsillo','Casi siempre se paga la entrada'] },
+
+  // ── Bloque E · La carrera y esta materia ───────────────────────────
+  { id:'area_sonido', bloque:'La carrera', tipo:'multi', ritmo:'comentada', seg:110, max_sel:2,
+    texto:'¿Qué área del sonido te interesa más?', hint:'Elegí hasta 2',
+    opciones:['Acústica arquitectónica','Producción musical','Procesamiento de señales','Audio en vivo','Diseño sonoro / medios','Acústica ambiental y ruido','Audio inmersivo / espacial','Restauración y archivo'] },
+
+  { id:'porque_carrera', bloque:'La carrera', tipo:'texto', ritmo:'comentada', seg:100,
+    texto:'¿Por qué elegiste esta carrera?', hint:'En 1 a 4 palabras', max:34 },
+
+  { id:'que_aprender', bloque:'La carrera', tipo:'texto', ritmo:'comentada', seg:110,
+    texto:'¿Qué quisieras aprender en esta clase?', hint:'Lo que realmente esperás', max:40 },
+
+  // ── Cierre · Identificación (opcional) ─────────────────────────────
+  { id:'nombre', bloque:'Cierre', tipo:'nombre', ritmo:'rapida', seg:60, privada:true,
+    texto:'Por último: ¿cómo te llamás?',
+    hint:'Podés elegir quedar en el anonimato — tu respuesta no se proyecta', max:40 },
+];
+
+/* =====================================================================
+   SINCRONIZACIÓN
+   ===================================================================== */
+const hayFirebase = Object.values(CONFIG_FIREBASE).every(v => v && v.trim());
+
+class LocalSync {
+  constructor(cod){
+    this.cod=cod; this.k='son514:'+cod; this.bc=new BroadcastChannel(this.k); this.subs=[];
+    this.bc.onmessage = () => this.emit();
+    addEventListener('storage', e => { if(e.key===this.k) this.emit(); });
+  }
+  _vacio(){ return { estado:{idx:-1,abierta:false,aviso:false}, respuestas:{}, participantes:{} }; }
+  _read(){ try{ return JSON.parse(localStorage.getItem(this.k)) || this._vacio(); }catch(e){ return this._vacio(); } }
+  _write(d){ localStorage.setItem(this.k, JSON.stringify(d)); this.bc.postMessage(1); this.emit(); }
+  emit(){ const d=this._read(); this.subs.forEach(f=>f(d)); }
+  onData(f){ this.subs.push(f); this.emit(); }
+  setEstado(e){ const d=this._read(); d.estado=e; this._write(d); }
+  responder(qid,pid,valor){ const d=this._read(); (d.respuestas[qid] ||= {})[pid]={valor,ts:Date.now()}; this._write(d); }
+  presencia(pid){ const d=this._read(); d.participantes[pid]=Date.now(); this._write(d); }
+  reset(){ this._write(this._vacio()); }
+}
+
+class FireSync {
+  constructor(cod, db, api){
+    this.cod=cod; this.db=db; this.api=api; this.base=`sesiones/${cod}`; this.subs=[]; this.cache=null;
+    api.onValue(api.ref(db,this.base), snap => {
+      const v = snap.val() || {};
+      v.estado ||= {idx:-1,abierta:false,aviso:false}; v.respuestas ||= {}; v.participantes ||= {};
+      this.cache=v; this.subs.forEach(f=>f(v));
+    });
+  }
+  onData(f){ this.subs.push(f); if(this.cache) f(this.cache); }
+  setEstado(e){ this.api.set(this.api.ref(this.db, this.base+'/estado'), e); }
+  responder(qid,pid,valor){ this.api.set(this.api.ref(this.db, `${this.base}/respuestas/${qid}/${pid}`), {valor,ts:Date.now()}); }
+  presencia(pid){ this.api.set(this.api.ref(this.db, `${this.base}/participantes/${pid}`), Date.now()); }
+  reset(){ this.api.set(this.api.ref(this.db, this.base), { estado:{idx:-1,abierta:false,aviso:false} }); }
+}
+
+/* =====================================================================
+   ARRANQUE
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const params = new URLSearchParams(location.search);
+// 6 caracteres (24^6 ≈ 191 millones de combinaciones): la sesión no se adivina por fuerza bruta
+function genCod(){
+  const L='ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const r=new Uint32Array(6); (crypto||{}).getRandomValues?.(r);
+  return Array.from({length:6},(_,i)=>L[(r[i]||Math.floor(Math.random()*1e9))%L.length]).join('');
+}
+const COD = (params.get('s') || localStorage.getItem('son514:ultimoCodigo') || genCod()).toUpperCase();
+localStorage.setItem('son514:ultimoCodigo', COD);
+function pidGen(){ let p=localStorage.getItem('son514:pid'); if(!p){ p='p'+Math.random().toString(36).slice(2,10); localStorage.setItem('son514:pid',p);} return p; }
+const PID = pidGen();
+
+let sync, DATA = { estado:{idx:-1,abierta:false,aviso:false}, respuestas:{}, participantes:{} };
+
+async function initSync(){
+  if(hayFirebase){
+    try{
+      const [{initializeApp},{getDatabase,ref,onValue,set}] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js'),
+      ]);
+      sync = new FireSync(COD, getDatabase(initializeApp(CONFIG_FIREBASE)), {ref,onValue,set});
+      marcaModo(true); return;
+    }catch(e){ console.error('Firebase falló; uso modo local:', e); }
+  }
+  sync = new LocalSync(COD); marcaModo(false);
+}
+function marcaModo(vivo){
+  const el=$('#modo'); el.classList.remove('hidden');
+  el.textContent = vivo ? '● en vivo' : '● modo local (solo este navegador)';
+  el.classList.toggle('local', !vivo);
+}
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ---- helpers de preguntas ---- */
+function aplica(q, pid){
+  if(!q.depende) return true;
+  const r = (DATA.respuestas[q.depende.id]||{})[pid];
+  if(!r) return false;
+  return String(r.valor) !== q.depende.distintoDe;
+}
+function duracionTotal(){
+  const s = PREGUNTAS.reduce((a,q)=>a+(q.seg||30),0);
+  return Math.round(s/60);
+}
+
+/* ---- ruteo ---- */
+function ruta(){
+  const h = location.hash.replace('#','');
+  $('#home').classList.toggle('hidden', h==='docente'||h==='responder');
+  $('#docente').classList.toggle('hidden', h!=='docente');
+  $('#alumno').classList.toggle('hidden', h!=='responder');
+  if(h==='docente') initDocente();
+  if(h==='responder') initAlumno();
+}
+addEventListener('hashchange', ruta);
+
+/* =====================================================================
+   VISTA DOCENTE
+   ===================================================================== */
+let docenteListo=false, tIni=0, vistoIdx=null, vistoAbierta=null;
+function initDocente(){
+  if(docenteListo) return; docenteListo=true;
+
+  $('#codigo').textContent = COD;
+  const url = location.origin + location.pathname + '?s=' + COD + '#responder';
+  $('#urlAlumno').textContent = url;
+  $('#qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=0&data='+encodeURIComponent(url);
+  $('#qr').onerror = () => $('#qr').style.display='none';
+  $('#estimado').textContent = '≈ '+duracionTotal()+' min';
+
+  const lista=$('#qlist'); let bloq='';
+  PREGUNTAS.forEach((q,i)=>{
+    if(q.bloque!==bloq){ bloq=q.bloque;
+      const b=document.createElement('div'); b.className='bloque'; b.textContent=q.bloque; lista.appendChild(b); }
+    const d=document.createElement('div'); d.className='qitem'; d.dataset.i=i;
+    d.innerHTML=`<span class="n">${i+1}</span><span class="t"></span><span class="mk"></span>`;
+    d.querySelector('.t').textContent=q.texto;
+    d.querySelector('.mk').textContent = (q.ritmo==='comentada'?'💬':'') + (q.privada?'🔒':'');
+    d.title = `${q.ritmo==='comentada'?'Comentada':'Rápida'} · ~${q.seg}s`;
+    d.onclick=()=>{ sync.setEstado({idx:i, abierta:true, aviso:false}); cerrarPanel(); };
+    lista.appendChild(d);
+  });
+
+  $('#btnLanzar').onclick=()=>sync.setEstado({idx: DATA.estado.idx<0?0:DATA.estado.idx, abierta:true, aviso:false});
+  $('#btnCerrar').onclick=()=>sync.setEstado({...DATA.estado, abierta:false});
+  $('#btnPrev').onclick  =()=>sync.setEstado({idx:Math.max(0,DATA.estado.idx-1), abierta:true, aviso:false});
+  $('#btnNext').onclick  =()=>sync.setEstado({idx:Math.min(PREGUNTAS.length-1,DATA.estado.idx+1), abierta:true, aviso:false});
+  $('#btnAviso').onclick =()=>sync.setEstado({idx:-1, abierta:false, aviso:!DATA.estado.aviso});
+  $('#btnCSV').onclick=exportarCSV;
+  $('#btnJSON').onclick=exportarJSON;
+  $('#btnReset').onclick=()=>{ if(confirm('¿Borrar todas las respuestas de la sesión '+COD+'?')){ sync.reset(); toast('Sesión reiniciada'); } };
+
+  $('#panelToggle').onclick=()=>{ $('#panel').classList.toggle('abierto'); $('#backdrop').classList.toggle('show'); };
+  $('#backdrop').onclick=cerrarPanel;
+
+  addEventListener('keydown', e=>{
+    if(location.hash!=='#docente') return;
+    if(e.target.tagName==='INPUT') return;
+    if(e.key==='ArrowRight') $('#btnNext').click();
+    if(e.key==='ArrowLeft')  $('#btnPrev').click();
+    if(e.key===' '){ e.preventDefault(); DATA.estado.abierta ? $('#btnCerrar').click() : $('#btnLanzar').click(); }
+  });
+
+  setInterval(()=>{
+    if(!DATA.estado.abierta || DATA.estado.idx<0 || !tIni){ $('#crono').textContent='0:00'; $('#crono').style.color='var(--txt)'; return; }
+    const s=Math.floor((Date.now()-tIni)/1000);
+    const q=PREGUNTAS[DATA.estado.idx];
+    $('#crono').textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    $('#crono').style.color = q && s > q.seg*1.6 ? 'var(--warn)' : 'var(--txt)';
+  },1000);
+
+  sync.onData(d=>{
+    // el cambio se mide contra estado propio: DATA es compartida y puede
+    // haber sido mutada ya por otro suscriptor (vista alumno en la misma pestaña)
+    if(d.estado.idx!==vistoIdx || d.estado.abierta!==vistoAbierta){
+      vistoIdx=d.estado.idx; vistoAbierta=d.estado.abierta;
+      tIni = (d.estado.abierta && d.estado.idx>=0) ? Date.now() : 0;
+    }
+    DATA=d;
+    pintarDocente();
+  });
+  animar();
+}
+function cerrarPanel(){ $('#panel').classList.remove('abierto'); $('#backdrop').classList.remove('show'); }
+
+function pintarDocente(){
+  const {idx, abierta, aviso} = DATA.estado;
+  const q = PREGUNTAS[idx];
+
+  $('#avisoProy').classList.toggle('show', !!aviso);
+
+  $$('.qitem').forEach(el=>{
+    const i=+el.dataset.i;
+    el.classList.toggle('active', i===idx);
+    el.classList.toggle('done', Object.keys(DATA.respuestas[PREGUNTAS[i].id]||{}).length>0 && i!==idx);
+  });
+
+  $('#nConn').textContent = Object.keys(DATA.participantes||{}).length;
+  $('#estadoTxt').textContent = idx<0 ? (aviso?'aviso en pantalla':'en espera') : (abierta?'recibiendo':'cerrada');
+  $('#estadoTxt').style.color = abierta ? 'var(--ok)' : 'var(--dim)';
+
+  if(!q){
+    $('#qBloque').textContent='—'; $('#qRitmo').style.display='none';
+    $('#qTexto').textContent = aviso ? '' : 'Presioná “Lanzar” para comenzar';
+    $('#qHint').textContent=''; $('#nResp').textContent='0'; $('#cBig').textContent='0';
+    $('#privado').classList.remove('show'); setBalloons([]); return;
+  }
+
+  $('#qBloque').textContent=q.bloque;
+  const rp=$('#qRitmo'); rp.style.display='inline-block';
+  rp.textContent = q.ritmo==='comentada' ? `💬 comentada · ~${q.seg}s` : `⚡ rápida · ~${q.seg}s`;
+  rp.className = 'pill '+(q.ritmo==='comentada'?'lento':'rapido');
+  $('#qTexto').textContent=q.texto;
+  $('#qHint').textContent=q.hint||'';
+
+  const res=DATA.respuestas[q.id]||{};
+  const n=Object.keys(res).length;
+  $('#nResp').textContent=n; $('#cBig').textContent=n;
+
+  if(q.privada){
+    $('#privado').classList.add('show'); $('#empty').style.display='none'; setBalloons([]);
+  }else{
+    $('#privado').classList.remove('show'); setBalloons(agrupar(res));
+  }
+}
+
+function agrupar(res){
+  const m=new Map();
+  Object.values(res).forEach(r=>{
+    (Array.isArray(r.valor)?r.valor:[r.valor]).forEach(v=>{
+      const k=normaliza(String(v)); if(!k) return;
+      const c=m.get(k)||{texto:String(v).trim(), n:0}; c.n++; m.set(k,c);
+    });
+  });
+  return [...m.values()].sort((a,b)=>b.n-a.n);
+}
+const normaliza = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ');
+
+/* ---------- globos ---------- */
+const PALETA=['#3b82f6','#22d3ee','#a78bfa','#f472b6','#fb923c','#34d399','#facc15','#60a5fa','#f87171','#2dd4bf'];
+let globos=[], raf=null;
+
+function topReservado(){
+  const h=$('#stageHead'); return (h?h.offsetHeight:150)+14;
+}
+
+function setBalloons(items){
+  const cont=$('#balloons');
+  $('#empty').style.display = (items.length || $('#privado').classList.contains('show')) ? 'none':'grid';
+
+  const vivos=new Map(globos.map(g=>[g.key,g]));
+  const nuevos=[];
+  const W=cont.clientWidth||800, H=cont.clientHeight||600;
+  const maxN=Math.max(...items.map(i=>i.n),1);
+  const escalaPantalla = Math.min(1, Math.sqrt((W*H)/(1280*720)));
+
+  items.slice(0,40).forEach((it,i)=>{
+    const key=normaliza(it.texto);
+    const palabras=it.texto.trim().split(/\s+/);
+    const largoMax=Math.max(...palabras.map(p=>p.length));
+    const total=it.texto.trim().length;
+    const rFrec =(34 + 44*Math.sqrt(it.n/maxN)) * escalaPantalla;
+    const rTexto=(24 + largoMax*3.2 + Math.sqrt(total)*3.4) * Math.max(.72, escalaPantalla);
+    const r=Math.max(rFrec, Math.min(rTexto, 96*Math.max(.7,escalaPantalla)));
+
+    let g=vivos.get(key);
+    if(!g){
+      g={ key, el:null, x:W/2+(Math.random()-.5)*W*.5, y:H*.62+(Math.random()-.5)*H*.3,
+          fase:Math.random()*Math.PI*2, color:PALETA[i%PALETA.length] };
+      const el=document.createElement('div'); el.className='balloon';
+      el.style.background=`radial-gradient(circle at 32% 28%, ${g.color}, ${sombra(g.color)})`;
+      el.style.color='#08101f'; el.style.opacity='0';
+      cont.appendChild(el); g.el=el;
+      requestAnimationFrame(()=>el.style.opacity='1');
+    }
+    g.r=r;
+    const util=r*2*.80;
+    const fs=Math.max(10, Math.min(28, r*.42, util/(largoMax*.60)));
+    g.el.style.width=g.el.style.height=(r*2)+'px';
+    g.el.style.padding=Math.round(r*.14)+'px';
+    g.el.style.fontSize=fs+'px';
+    g.el.innerHTML='';
+    const t=document.createElement('span'); t.textContent=it.texto; g.el.appendChild(t);
+    if(it.n>1){ const c=document.createElement('span'); c.className='cnt'; c.textContent='×'+it.n; g.el.appendChild(c); }
+    nuevos.push(g); vivos.delete(key);
+  });
+
+  vivos.forEach(g=>{ g.el.style.opacity='0'; setTimeout(()=>g.el.remove(),520); });
+  globos=nuevos;
+  repartir();
+}
+
+function repartir(){
+  const cont=$('#balloons');
+  const W=cont.clientWidth||900, H=cont.clientHeight||600, TOP=topReservado();
+  const cx=W/2, cy=TOP+(H-TOP)/2;
+  const AUREO=Math.PI*(3-Math.sqrt(5));
+  const area=globos.reduce((s,g)=>s+g.r*g.r,0)||1;
+  const escala=Math.min(W,H-TOP)/(2.6*Math.sqrt(area));
+  const achatado = W>H ? .78 : 1.05;   // en vertical se estira hacia abajo
+
+  globos.forEach((g,i)=>{
+    const ang=i*AUREO;
+    const rad=escala*Math.sqrt(area)*Math.sqrt(i/Math.max(globos.length,1))*1.9;
+    g.tx=Math.max(g.r+8, Math.min(W-g.r-8, cx+Math.cos(ang)*rad));
+    g.ty=Math.max(TOP+g.r, Math.min(H-g.r-8, cy+Math.sin(ang)*rad*achatado));
+  });
+}
+addEventListener('resize', ()=>{ repartir(); });
+
+function sombra(hex){
+  const n=parseInt(hex.slice(1),16);
+  return `rgb(${Math.max(0,(n>>16)-70)},${Math.max(0,((n>>8)&255)-70)},${Math.max(0,(n&255)-70)})`;
+}
+function animar(){
+  if(raf) return;
+  const frame=()=>{
+    const cont=$('#balloons');
+    const W=cont.clientWidth, H=cont.clientHeight, TOP=topReservado();
+    const t=Date.now()/1000;
+    for(const a of globos){
+      if(a.tx==null) continue;
+      a.x+=(a.tx-a.x)*.045; a.y+=(a.ty-a.y)*.045;
+      a.x+=Math.cos(t*.55+a.fase)*.30; a.y+=Math.sin(t*.42+a.fase)*.38;
+    }
+    for(let iter=0; iter<3; iter++){
+      for(let i=0;i<globos.length;i++){
+        const a=globos[i];
+        for(let j=i+1;j<globos.length;j++){
+          const b=globos[j], dx=b.x-a.x, dy=b.y-a.y;
+          const d=Math.hypot(dx,dy)||.01, min=a.r+b.r+10;
+          if(d<min){ const f=(min-d)/d*.5; a.x-=dx*f; a.y-=dy*f; b.x+=dx*f; b.y+=dy*f; }
+        }
+      }
+    }
+    for(const a of globos){
+      a.x=Math.max(a.r+4, Math.min(W-a.r-4, a.x));
+      a.y=Math.max(TOP+a.r*.35, Math.min(H-a.r-4, a.y));
+      a.el.style.transform=`translate(${a.x-a.r}px, ${a.y-a.r}px)`;
+    }
+    raf=requestAnimationFrame(frame);
+  };
+  raf=requestAnimationFrame(frame);
+}
+
+/* ---------- exportación ---------- */
+function exportarCSV(){
+  const pids=new Set();
+  Object.values(DATA.respuestas).forEach(o=>Object.keys(o).forEach(p=>pids.add(p)));
+  const cab=['participante', ...PREGUNTAS.map(q=>q.id)];
+  const esc=v=>{ const s=v==null?'':String(v); return /[",;\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+  const out=[cab.join(',')];
+  [...pids].forEach(p=>{
+    out.push([p, ...PREGUNTAS.map(q=>{
+      const r=(DATA.respuestas[q.id]||{})[p];
+      if(!r) return '';
+      return Array.isArray(r.valor)?r.valor.join(' | '):r.valor;
+    })].map(esc).join(','));
+  });
+  bajar(out.join('\n'), `SON514_encuesta_${COD}.csv`, 'text/csv;charset=utf-8');
+  toast(`CSV exportado — ${pids.size} participantes`);
+}
+function exportarJSON(){
+  bajar(JSON.stringify({codigo:COD, exportado:new Date().toISOString(), preguntas:PREGUNTAS, datos:DATA},null,2),
+        `SON514_encuesta_${COD}.json`, 'application/json');
+  toast('JSON exportado');
+}
+function bajar(txt,nombre,mime){
+  const b=new Blob(['﻿'+txt],{type:mime});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=nombre; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+
+/* =====================================================================
+   VISTA ALUMNO
+   ===================================================================== */
+let alumnoListo=false, ultimoIdx=null, seleccion=[], anonimo=false;
+const KEY_AVISO='son514:aviso:'+COD;
+
+function initAlumno(){
+  if(alumnoListo) return; alumnoListo=true;
+  sync.presencia(PID);
+  setInterval(()=>sync.presencia(PID), 25000);
+  sync.onData(d=>{ DATA=d; pintarAlumno(); });
+}
+
+function pintarAlumno(){
+  const body=$('#aBody');
+
+  // 1) aviso ético obligatorio
+  if(localStorage.getItem(KEY_AVISO)!=='1'){
+    if(body.dataset.vista==='aviso') return;
+    body.dataset.vista='aviso';
+    $('#aProg').textContent='—'; $('#aBloque').textContent='Aviso';
+    body.innerHTML='';
+    const w=document.createElement('div');
+    w.innerHTML=`
+      <div style="text-align:center;font-size:3rem">🔒</div>
+      <h2 style="text-align:center;font-size:1.35rem;margin:.4rem 0 1rem;letter-spacing:-.02em">Antes de empezar</h2>
+      <div class="nota" style="font-size:.95rem">
+        <p style="margin:.2rem 0 .8rem">Las respuestas que emitas son de
+          <b style="color:var(--txt)">uso exclusivamente académico para esta materia</b>.
+          No se usarán de ninguna otra manera.</p>
+        <p style="margin:.2rem 0 .8rem">Servirán para construir, entre todos, el ejercicio de la
+          clase del miércoles.</p>
+        <p style="margin:.2rem 0 .8rem">Al final se te pedirá tu nombre y vas a poder
+          <b style="color:var(--txt)">elegir quedar en el anonimato</b>.</p>
+        <p style="margin:.2rem 0">Las preguntas sobre ingresos y datos personales
+          <b style="color:var(--txt)">no se proyectan</b> en la pantalla del aula.</p>
+      </div>`;
+    const b=document.createElement('button');
+    b.className='btn primary big'; b.textContent='Entendido, empezar';
+    b.style.marginTop='1rem';
+    b.onclick=()=>{ localStorage.setItem(KEY_AVISO,'1'); body.dataset.vista=''; ultimoIdx=null; pintarAlumno(); };
+    w.appendChild(b); body.appendChild(w);
+    return;
+  }
+
+  const {idx, abierta}=DATA.estado;
+  const q=PREGUNTAS[idx];
+  $('#aProg').textContent = q ? `${idx+1} / ${PREGUNTAS.length}` : '—';
+  $('#aBloque').textContent = q ? q.bloque : 'SON-514';
+
+  if(!q || !abierta){
+    if(body.dataset.vista==='espera') return;
+    body.dataset.vista='espera'; ultimoIdx=null;
+    body.innerHTML=`<div class="wait"><p style="font-size:1.05rem">${q&&!abierta?'Pregunta cerrada':'Esperando la siguiente pregunta'}</p>
+      <div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <p style="margin-top:1.4rem;font-size:.85rem">Sesión <b style="color:var(--acc2);letter-spacing:.2em">${COD}</b></p></div>`;
+    return;
+  }
+
+  // ¿no le corresponde por su respuesta previa?
+  if(!aplica(q, PID)){
+    if(body.dataset.vista==='na'+idx) return;
+    body.dataset.vista='na'+idx; ultimoIdx=null;
+    body.innerHTML=`<div class="wait"><div style="font-size:2.4rem">↷</div>
+      <p style="font-size:1.05rem;margin-top:.5rem">Esta pregunta no aplica en tu caso</p>
+      <p style="font-size:.88rem">Esperá la siguiente</p></div>`;
+    return;
+  }
+
+  if((DATA.respuestas[q.id]||{})[PID]){
+    if(body.dataset.vista==='ok'+idx) return;
+    body.dataset.vista='ok'+idx; ultimoIdx=null;
+    const priv = q.privada;
+    body.innerHTML=`<div class="ok"><div class="big">✓</div>
+      <p style="font-size:1.15rem;font-weight:700;margin:.5rem 0">Respuesta enviada</p>
+      <p style="color:var(--dim)">${priv?'Queda solo en el registro de la materia':'Mirá la pantalla — tu respuesta ya está ahí'}</p></div>`;
+    return;
+  }
+
+  if(ultimoIdx===idx) return;
+  ultimoIdx=idx; seleccion=[]; anonimo=false; body.dataset.vista='q'+idx;
+
+  body.innerHTML='';
+  const h=document.createElement('div'); h.id='aTexto'; h.textContent=q.texto; body.appendChild(h);
+  if(q.hint){ const s=document.createElement('div'); s.id='aHint'; s.textContent=q.hint; body.appendChild(s); }
+
+  /* ---- texto / número ---- */
+  if(q.tipo==='texto' || q.tipo==='numero'){
+    const inp=document.createElement('input');
+    inp.className='inp'; inp.type = q.tipo==='numero'?'number':'text';
+    if(q.tipo==='numero'){ inp.min=q.min; inp.max=q.max; inp.inputMode='numeric'; }
+    if(q.max) inp.maxLength=q.max;
+    inp.placeholder = q.tipo==='numero'?'Tu respuesta…':'Escribí acá…';
+    inp.autocomplete='off';
+    body.appendChild(inp);
+    const b=document.createElement('button'); b.className='btn primary big'; b.textContent='Enviar';
+    b.onclick=()=>{
+      const v=inp.value.trim(); if(!v) return inp.focus();
+      if(q.tipo==='numero'){ const n=+v; if(isNaN(n)||n<q.min||n>q.max) return toast(`Ingresá un número entre ${q.min} y ${q.max}`); }
+      enviar(q, q.tipo==='numero'?+v:v);
+    };
+    inp.onkeydown=e=>{ if(e.key==='Enter') b.click(); };
+    body.appendChild(b);
+    setTimeout(()=>inp.focus(),150);
+  }
+
+  /* ---- opción única / múltiple ---- */
+  if(q.tipo==='opcion' || q.tipo==='multi'){
+    const wrap=document.createElement('div'); wrap.className='opts';
+    let btn=null;
+    q.opciones.forEach(op=>{
+      const d=document.createElement('div'); d.className='opt';
+      d.innerHTML='<span class="bx"></span>';
+      const sp=document.createElement('span'); sp.textContent=op; d.appendChild(sp);
+      d.onclick=()=>{
+        if(q.tipo==='opcion'){ enviar(q,op); return; }
+        const i=seleccion.indexOf(op);
+        if(i>=0){ seleccion.splice(i,1); d.classList.remove('sel'); d.querySelector('.bx').textContent=''; }
+        else{
+          if(seleccion.length>=(q.max_sel||3)) return toast(`Máximo ${q.max_sel||3} opciones`);
+          seleccion.push(op); d.classList.add('sel'); d.querySelector('.bx').textContent='✓';
+        }
+        if(btn){ btn.disabled=!seleccion.length; btn.textContent = seleccion.length?`Enviar (${seleccion.length})`:'Elegí al menos 1'; }
+      };
+      wrap.appendChild(d);
+    });
+    body.appendChild(wrap);
+    if(q.tipo==='multi'){
+      btn=document.createElement('button');
+      btn.className='btn primary big'; btn.textContent='Elegí al menos 1'; btn.disabled=true;
+      btn.onclick=()=>seleccion.length&&enviar(q,[...seleccion]);
+      body.appendChild(btn);
+    }
+  }
+
+  /* ---- nombre + anonimato ---- */
+  if(q.tipo==='nombre'){
+    const inp=document.createElement('input');
+    inp.className='inp'; inp.type='text'; inp.maxLength=q.max||40;
+    inp.placeholder='Nombre y apellido'; inp.autocomplete='off';
+    body.appendChild(inp);
+
+    const chk=document.createElement('div'); chk.className='chk';
+    chk.innerHTML='<span class="bx"></span>';
+    const sp=document.createElement('span'); sp.textContent='Prefiero quedar en el anonimato';
+    chk.appendChild(sp); body.appendChild(chk);
+
+    const nota=document.createElement('div'); nota.className='nota';
+    nota.textContent='Si elegís el anonimato, tu nombre no se guarda: tus respuestas quedan en el conjunto de datos sin ninguna identificación.';
+    body.appendChild(nota);
+
+    const b=document.createElement('button'); b.className='btn primary big'; b.textContent='Enviar';
+    chk.onclick=()=>{
+      anonimo=!anonimo;
+      chk.classList.toggle('sel',anonimo);
+      chk.querySelector('.bx').textContent=anonimo?'✓':'';
+      inp.disabled=anonimo; if(anonimo) inp.value='';
+      inp.style.opacity=anonimo?'.4':'1';
+      b.textContent=anonimo?'Enviar en anonimato':'Enviar';
+    };
+    b.onclick=()=>{
+      if(anonimo) return enviar(q,'(anónimo)');
+      const v=inp.value.trim(); if(!v) return toast('Escribí tu nombre o marcá el anonimato');
+      enviar(q,v);
+    };
+    inp.onkeydown=e=>{ if(e.key==='Enter') b.click(); };
+    body.appendChild(b);
+  }
+}
+
+function enviar(q,valor){ sync.responder(q.id,PID,valor); ultimoIdx=null; pintarAlumno(); }
+
+/* ===================================================================== */
+await initSync();
+ruta();
+</script>
+</body>
+</html>

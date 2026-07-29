@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SON-514 · Taller de análisis de datos</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#131a30; --line:#2a3559; --txt:#eef2ff; --dim:#93a0c8;
+    --acc:#5b8cff; --acc2:#22d3ee; --ok:#34d399; --warn:#fbbf24; --danger:#f87171;
+    --f: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:radial-gradient(1200px 800px at 20% -10%,#1b2547 0%,var(--bg) 55%) fixed;
+       color:var(--txt); font-family:var(--f); -webkit-font-smoothing:antialiased; min-height:100%}
+  .wrap{max-width:1180px; margin:0 auto; padding:clamp(1rem,3vw,2rem)}
+  h1{font-size:clamp(1.4rem,3.5vw,2rem); letter-spacing:-.03em; margin:.2rem 0 .3rem}
+  h2{font-size:clamp(1.1rem,2.4vw,1.35rem); letter-spacing:-.02em; margin:0 0 .2rem}
+  .sub{color:var(--dim); font-size:.95rem; line-height:1.55}
+  .pill{display:inline-block; padding:.22rem .65rem; border-radius:999px; font-size:.7rem;
+        background:#1e2a4d; border:1px solid var(--line); color:var(--dim); font-weight:700;
+        letter-spacing:.05em; text-transform:uppercase}
+  .pill.ok{background:#12331f; border-color:#1f6b3f; color:var(--ok)}
+  .pill.warn{background:#3a2c14; border-color:#7a5a1e; color:var(--warn)}
+  .pill.info{background:#12304a; border-color:#1d5b7a; color:var(--acc2)}
+
+  .panel{background:linear-gradient(180deg,rgba(24,34,64,.9),rgba(19,26,48,.9));
+         border:1px solid var(--line); border-radius:1rem; padding:clamp(1rem,2.5vw,1.5rem); margin-bottom:1.1rem}
+  .btn{border:1px solid var(--line); background:linear-gradient(180deg,#233059,#1a2444); color:var(--txt);
+       padding:.6rem 1rem; border-radius:.6rem; font-size:.92rem; cursor:pointer; font-weight:600;
+       font-family:inherit; transition:.15s}
+  .btn:hover{border-color:var(--acc)}
+  .btn.primary{background:linear-gradient(180deg,#3b6ef5,#2a54c9); border-color:#4d7dff}
+  .btn.sm{padding:.4rem .75rem; font-size:.82rem}
+  select,input[type=file]{background:#0f1730; border:1px solid var(--line); color:var(--txt);
+       padding:.65rem .8rem; border-radius:.6rem; font-family:inherit; font-size:.95rem; width:100%}
+  select:focus{outline:none; border-color:var(--acc)}
+  label{display:block; font-size:.75rem; color:var(--dim); text-transform:uppercase;
+        letter-spacing:.07em; font-weight:700; margin-bottom:.35rem}
+
+  .tabs{display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:1.1rem}
+  .tab{padding:.6rem 1rem; border-radius:.6rem; border:1px solid var(--line); background:#141d38;
+       cursor:pointer; font-size:.92rem; font-weight:600; transition:.15s}
+  .tab:hover{border-color:var(--acc)}
+  .tab.on{background:#23407f; border-color:var(--acc)}
+
+  table{border-collapse:collapse; width:100%; font-size:.88rem}
+  th,td{border:1px solid var(--line); padding:.45rem .6rem; text-align:right}
+  th{background:#1b2545; font-weight:700; text-align:center}
+  td.cat,th.cat{text-align:left; background:#161f3c; font-weight:600}
+  .tabla-scroll{overflow-x:auto; margin:.6rem 0; -webkit-overflow-scrolling:touch}
+  td.hi{background:#1d3a5c}
+  td.lo{background:#3a1d2a}
+
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:.6rem; margin:.8rem 0}
+  .kpi{background:#111a33; border:1px solid var(--line); border-radius:.7rem; padding:.7rem .8rem}
+  .kpi .v{font-size:1.35rem; font-weight:800; letter-spacing:-.02em; color:var(--acc2)}
+  .kpi .l{font-size:.7rem; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; margin-top:.1rem}
+
+  details{background:#111a33; border:1px solid var(--line); border-radius:.7rem; margin:.7rem 0}
+  details>summary{cursor:pointer; padding:.7rem .9rem; font-weight:700; font-size:.9rem; list-style:none; color:var(--acc2)}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::before{content:'▸ '; display:inline-block; transition:.15s}
+  details[open]>summary::before{transform:rotate(90deg)}
+  details .cuerpo{padding:0 .9rem .9rem; font-size:.9rem; line-height:1.6; color:var(--dim)}
+  details .cuerpo b{color:var(--txt)}
+  .formula{font-family:var(--mono); background:#0a1226; border:1px solid var(--line);
+           border-radius:.5rem; padding:.7rem .8rem; margin:.5rem 0; font-size:.86rem;
+           color:#cfe0ff; overflow-x:auto; white-space:pre}
+
+  .nota{font-size:.87rem; line-height:1.6; border-radius:.6rem; padding:.75rem .9rem; margin:.6rem 0}
+  .nota.aviso{background:#2a2010; border:1px solid #7a5a1e; color:#f2d99b}
+  .nota.bien{background:#10281c; border:1px solid #1f6b3f; color:#a7e8c4}
+  .nota.neutro{background:#111a33; border:1px solid var(--line); color:var(--dim)}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:1rem}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:.8rem}
+  @media(max-width:780px){ .grid2,.grid3{grid-template-columns:1fr} }
+
+  svg{max-width:100%; height:auto; display:block}
+  .leyenda{display:flex; flex-wrap:wrap; gap:.6rem; font-size:.8rem; color:var(--dim); margin-top:.5rem}
+  .leyenda i{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:.3rem;vertical-align:-1px}
+  .vacio{color:#4a5678; text-align:center; padding:2.5rem 1rem; font-size:.95rem}
+  .drop{border:2px dashed var(--line); border-radius:.8rem; padding:1.4rem; text-align:center;
+        color:var(--dim); font-size:.9rem; transition:.15s; cursor:pointer}
+  .drop.over{border-color:var(--acc); background:#182246; color:var(--txt)}
+  code{font-family:var(--mono); background:#0a1226; padding:.1rem .35rem; border-radius:.3rem; font-size:.88em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header style="margin-bottom:1.2rem">
+    <span class="pill">SON-514 · Unidad 5 · Análisis de datos</span>
+    <h1>Taller de análisis de datos</h1>
+    <p class="sub">Analizamos los datos que generó el propio curso. Cada resultado se puede desplegar
+      para ver <b style="color:var(--txt)">cómo se calcula</b>: la fórmula, los números intermedios y
+      cómo se lee.</p>
+  </header>
+
+  <!-- ============ 1. DATOS ============ -->
+  <section class="panel">
+    <h2>1 · Los datos</h2>
+    <p class="sub" style="margin-bottom:1rem">Cargá el archivo exportado desde la encuesta, o usá
+      datos simulados para ensayar el taller antes de la clase.</p>
+    <div class="grid3">
+      <div>
+        <label>Archivo exportado</label>
+        <div class="drop" id="drop">Arrastrá el <b>.json</b> o <b>.csv</b><br><span style="font-size:.8rem">o hacé clic</span>
+          <input type="file" id="file" accept=".json,.csv" style="display:none">
+        </div>
+      </div>
+      <div>
+        <label>Sesión guardada en este navegador</label>
+        <select id="selSesion"><option value="">— ninguna encontrada —</option></select>
+        <button class="btn sm" id="btnSesion" style="margin-top:.5rem; width:100%">Cargar sesión</button>
+      </div>
+      <div>
+        <label>Ensayo</label>
+        <button class="btn sm" id="btnDemo" style="width:100%">Generar 30 casos simulados</button>
+        <p class="sub" style="font-size:.8rem; margin-top:.5rem">Datos ficticios con relaciones
+          conocidas, para practicar la lectura.</p>
+      </div>
+    </div>
+    <div id="estadoDatos" style="margin-top:1rem"></div>
+  </section>
+
+  <div id="app" style="display:none">
+    <div class="tabs">
+      <div class="tab on" data-v="uni">Una variable</div>
+      <div class="tab" data-v="bi">Cruce de dos variables</div>
+      <div class="tab" data-v="guia">¿Qué análisis corresponde?</div>
+    </div>
+
+    <!-- ============ 2. UNIVARIADO ============ -->
+    <section class="panel" id="vUni">
+      <h2>2 · Descriptivas de una variable</h2>
+      <p class="sub" style="margin-bottom:.9rem">El primer paso de todo análisis: describir cada
+        variable por separado antes de relacionarla con otras.</p>
+      <label>Variable</label>
+      <select id="selUni"></select>
+      <div id="outUni"></div>
+    </section>
+
+    <!-- ============ 3. BIVARIADO ============ -->
+    <section class="panel" id="vBi" style="display:none">
+      <h2>3 · Cruce de dos variables</h2>
+      <p class="sub" style="margin-bottom:.9rem">El tablero elige la prueba estadística según el
+        <b style="color:var(--txt)">tipo</b> de las dos variables, y explica por qué esa y no otra.</p>
+      <div class="grid2">
+        <div><label>Variable 1</label><select id="selX"></select></div>
+        <div><label>Variable 2</label><select id="selY"></select></div>
+      </div>
+      <div id="outBi"></div>
+    </section>
+
+    <!-- ============ 4. GUÍA ============ -->
+    <section class="panel" id="vGuia" style="display:none">
+      <h2>4 · ¿Qué análisis corresponde en cada caso?</h2>
+      <p class="sub">Esta es la decisión central del análisis: no se elige la prueba por costumbre,
+        sino por el tipo de variables que se cruzan.</p>
+
+      <div class="tabla-scroll">
+      <table style="margin-top:1rem">
+        <tr><th class="cat">Variable 1</th><th class="cat">Variable 2</th><th class="cat">Qué se hace</th><th class="cat">Qué mide la fuerza</th></tr>
+        <tr><td class="cat">Cualitativa</td><td class="cat">—</td><td class="cat">Tabla de frecuencias + gráfico de barras</td><td class="cat">Moda</td></tr>
+        <tr><td class="cat">Cuantitativa</td><td class="cat">—</td><td class="cat">Media, mediana, desviación, histograma</td><td class="cat">Coef. de variación</td></tr>
+        <tr><td class="cat">Cualitativa</td><td class="cat">Cualitativa</td><td class="cat">Tabla de contingencia + <b>chi-cuadrado</b></td><td class="cat">V de Cramér</td></tr>
+        <tr><td class="cat">Cualitativa (2 grupos)</td><td class="cat">Cuantitativa</td><td class="cat">Medias por grupo + <b>t de Student</b></td><td class="cat">d de Cohen</td></tr>
+        <tr><td class="cat">Cualitativa (3+ grupos)</td><td class="cat">Cuantitativa</td><td class="cat">Medias por grupo + <b>ANOVA</b></td><td class="cat">eta cuadrado</td></tr>
+        <tr><td class="cat">Cuantitativa</td><td class="cat">Cuantitativa</td><td class="cat">Dispersión + <b>correlación de Pearson</b></td><td class="cat">r y r²</td></tr>
+      </table>
+      </div>
+
+      <details open style="margin-top:1.2rem">
+        <summary>Qué significa realmente el valor p (y qué NO significa)</summary>
+        <div class="cuerpo">
+          <p>El valor p responde a una sola pregunta: <b>si en la realidad no hubiera ninguna relación
+          entre las dos variables, ¿qué tan probable sería obtener por puro azar una diferencia como
+          la que observé?</b></p>
+          <p>Si p = 0,03, significa que un resultado así aparecería por azar 3 veces de cada 100. Por
+          convención, cuando p &lt; 0,05 se dice que el resultado es <b>estadísticamente significativo</b>.</p>
+          <p style="margin-top:.8rem"><b>Tres errores frecuentes:</b></p>
+          <p>× <b>p no es la probabilidad de que tu hipótesis sea verdadera.</b> Es la probabilidad de
+          los datos suponiendo que no hay relación.</p>
+          <p>× <b>"Significativo" no quiere decir "importante".</b> Con una muestra muy grande, una
+          diferencia trivial da p pequeño. Por eso siempre se reporta también el <b>tamaño del efecto</b>
+          (V de Cramér, d de Cohen, r²).</p>
+          <p>× <b>p ≥ 0,05 no prueba que no haya relación.</b> Solo dice que estos datos no alcanzan
+          para detectarla. Ausencia de evidencia no es evidencia de ausencia.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Por qué el tamaño del curso condiciona lo que podemos concluir</summary>
+        <div class="cuerpo">
+          <p>Con un curso de 20 a 30 estudiantes, la mayoría de los cruces <b>no va a dar significativa</b>
+          aunque exista una relación real. Es un problema de <b>potencia estadística</b>: muestras chicas
+          solo detectan efectos grandes.</p>
+          <p>Además, el chi-cuadrado exige que las frecuencias esperadas sean razonables (habitualmente
+          ≥ 5 en la mayoría de las celdas). Con pocos casos y muchas categorías, ese supuesto se rompe
+          casi siempre — el tablero lo avisa cuando pasa.</p>
+          <p><b>Esto no invalida el ejercicio: es el ejercicio.</b> Aprender a decir "con estos datos no
+          puedo afirmar esto" es exactamente la competencia que la materia busca formar. Un investigador
+          se distingue por lo que <i>no</i> concluye.</p>
+          <p style="margin-top:.7rem">Y hay algo más: este curso <b>no es una muestra aleatoria</b> de nada.
+          Los resultados describen a este grupo, no a "los estudiantes de sonido". La inferencia
+          estadística supone muestreo aleatorio; acá la usamos para <b>aprender el procedimiento</b>,
+          no para generalizar.</p>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <p class="sub" style="text-align:center; font-size:.8rem; margin-top:2rem">
+    SON-514 Metodología de la Investigación · Ingeniería de Sonido · UNITEPC</p>
+</div>
+
+<script src="estadistica.js"></script>
+<script>
+'use strict';
+const E = window.Estad;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt=E.fmt, pct=E.pct;
+const PAL=['#3b82f6','#22d3ee','#a78bfa','#f472b6','#fb923c','#34d399','#facc15','#60a5fa','#f87171','#2dd4bf','#c084fc','#4ade80'];
+
+let PREG=[], FILAS=[];      // PREG: definición de variables · FILAS: un objeto por participante
+
+/* ---------- tipificación de variables ---------- */
+function tipoDe(q){
+  if(q.tipo==='numero') return 'cuant';
+  if(q.tipo==='multi')  return 'multi';
+  if(q.tipo==='opcion') return q.ordinal ? 'ordinal' : 'cual';
+  return 'texto';                       // texto libre → se trata como categórica
+}
+const etiquetaTipo = { cuant:'cuantitativa', ordinal:'ordinal', cual:'cualitativa',
+                       multi:'respuesta múltiple', texto:'texto abierto' };
+const ordenDe = q => q.ordinal ? (q.opciones||[]).filter(o=>!(q.sinOrden||[]).includes(o)) : null;
+const valores = id => FILAS.map(f=>f[id]).filter(v=>v!=null && v!=='');
+
+/* ---------- carga de datos ---------- */
+function desdeJSON(obj){
+  PREG = obj.preguntas || [];
+  const R = (obj.datos && obj.datos.respuestas) || obj.respuestas || {};
+  const pids=new Set();
+  Object.values(R).forEach(o=>Object.keys(o).forEach(p=>pids.add(p)));
+  FILAS=[...pids].map(p=>{
+    const f={_id:p};
+    PREG.forEach(q=>{ const r=R[q.id]&&R[q.id][p]; if(r!=null) f[q.id]=r.valor; });
+    return f;
+  });
+}
+function desdeCSV(txt){
+  const lineas = txt.replace(/^﻿/,'').split(/\r?\n/).filter(l=>l.trim());
+  const cab = partirCSV(lineas[0]);
+  FILAS = lineas.slice(1).map(l=>{
+    const c=partirCSV(l), f={};
+    cab.forEach((k,i)=>{ let v=c[i]??''; if(k==='participante') f._id=v; else if(v!=='') f[k]=v.includes(' | ')?v.split(' | '):v; });
+    return f;
+  });
+  // metadatos: si no vinieron, se infieren de los propios datos
+  if(!PREG.length){
+    PREG = cab.filter(k=>k!=='participante').map(id=>{
+      const vs=FILAS.map(f=>f[id]).filter(v=>v!=null&&v!=='');
+      const todosNum = vs.length && vs.every(v=>!Array.isArray(v)&&isFinite(+v));
+      const hayArr = vs.some(v=>Array.isArray(v));
+      return { id, texto:id, tipo: hayArr?'multi' : todosNum?'numero':'opcion' };
+    });
+  }
+}
+function partirCSV(l){
+  const out=[]; let cur='', dentro=false;
+  for(let i=0;i<l.length;i++){
+    const c=l[i];
+    if(c==='"'){ if(dentro && l[i+1]==='"'){ cur+='"'; i++; } else dentro=!dentro; }
+    else if(c===',' && !dentro){ out.push(cur); cur=''; }
+    else cur+=c;
+  }
+  out.push(cur); return out;
+}
+
+function listo(fuente){
+  FILAS = FILAS.filter(f=>Object.keys(f).length>1);
+  if(!FILAS.length){ $('#estadoDatos').innerHTML='<div class="nota aviso">No se encontraron respuestas en ese archivo.</div>'; return; }
+  const conDatos = PREG.filter(q=>valores(q.id).length>0);
+  $('#estadoDatos').innerHTML=
+    `<div class="nota bien"><b>${FILAS.length} participantes</b> · ${conDatos.length} variables con datos · fuente: ${fuente}</div>`;
+  $('#app').style.display='block';
+  llenarSelects(conDatos);
+  pintarUni(); pintarBi();
+}
+function llenarSelects(qs){
+  const opt=q=>`<option value="${q.id}">${q.texto.length>58?q.texto.slice(0,58)+'…':q.texto} · ${etiquetaTipo[tipoDe(q)]}</option>`;
+  $('#selUni').innerHTML=qs.map(opt).join('');
+  $('#selX').innerHTML=qs.map(opt).join('');
+  $('#selY').innerHTML=qs.map(opt).join('');
+  // arranca con un cruce interesante: una categórica contra una cuantitativa distinta
+  const cual=qs.find(q=>['cual','ordinal'].includes(tipoDe(q)));
+  const cuant=qs.find(q=>tipoDe(q)==='cuant');
+  if(cual && cuant){ $('#selX').value=cual.id; $('#selY').value=cuant.id; }
+  else if(qs[1]) $('#selY').value=qs[1].id;
+}
+
+/* ---------- gráficos (SVG puro) ---------- */
+function barras(filas, {alto=null, color=null}={}){
+  const n=filas.length, h=alto||Math.max(140, n*30+30), W=680, L=Math.min(210, W*.34);
+  const max=Math.max(...filas.map(f=>f.fi),1);
+  const bh=Math.min(26,(h-24)/n-6);
+  let s=`<svg viewBox="0 0 ${W} ${h}" role="img">`;
+  filas.forEach((f,i)=>{
+    const y=12+i*((h-24)/n), w=(W-L-56)*(f.fi/max);
+    const c=color||PAL[i%PAL.length];
+    const txt=String(f.cat).length>28?String(f.cat).slice(0,28)+'…':f.cat;
+    s+=`<text x="${L-8}" y="${y+bh*.72}" text-anchor="end" fill="#93a0c8" font-size="12">${esc(txt)}</text>`;
+    s+=`<rect x="${L}" y="${y}" width="${Math.max(w,1)}" height="${bh}" rx="4" fill="${c}" opacity=".9"/>`;
+    s+=`<text x="${L+w+7}" y="${y+bh*.75}" fill="#eef2ff" font-size="12" font-weight="700">${f.fi}</text>`;
+    s+=`<text x="${L+w+7+String(f.fi).length*8+6}" y="${y+bh*.75}" fill="#5d6b93" font-size="11">${pct(f.hi)}</text>`;
+  });
+  return s+'</svg>';
+}
+function histograma(d){
+  const x=d.datos, n=x.length;
+  const k=Math.max(3, Math.min(12, Math.ceil(Math.sqrt(n))));
+  const min=d.min, max=d.max, amp=(max-min)/k || 1;
+  const bins=Array.from({length:k},(_,i)=>({li:min+i*amp, ls:min+(i+1)*amp, fi:0}));
+  x.forEach(v=>{ let i=Math.floor((v-min)/amp); if(i>=k) i=k-1; if(i<0) i=0; bins[i].fi++; });
+  const W=680,H=210,L=42,B=34, maxF=Math.max(...bins.map(b=>b.fi),1);
+  let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  s+=`<line x1="${L}" y1="${H-B}" x2="${W-10}" y2="${H-B}" stroke="#2a3559"/>`;
+  s+=`<line x1="${L}" y1="10" x2="${L}" y2="${H-B}" stroke="#2a3559"/>`;
+  const bw=(W-L-20)/k;
+  bins.forEach((b,i)=>{
+    const bh=(H-B-14)*(b.fi/maxF);
+    s+=`<rect x="${L+i*bw+2}" y="${H-B-bh}" width="${bw-4}" height="${bh}" rx="3" fill="#3b82f6" opacity=".85"/>`;
+    if(b.fi) s+=`<text x="${L+i*bw+bw/2}" y="${H-B-bh-5}" text-anchor="middle" fill="#eef2ff" font-size="11" font-weight="700">${b.fi}</text>`;
+    s+=`<text x="${L+i*bw+bw/2}" y="${H-B+14}" text-anchor="middle" fill="#5d6b93" font-size="9.5">${fmt(b.li,0)}</text>`;
+  });
+  s+=`<text x="${W-10}" y="${H-B+28}" text-anchor="end" fill="#5d6b93" font-size="10">${k} intervalos (regla de la raíz de n)</text>`;
+  return s+'</svg>';
+}
+function caja(d, x0, ancho, escala){
+  const q1=escala(d.q1), me=escala(d.mediana), q3=escala(d.q3);
+  const lo=escala(Math.max(d.min, d.q1-1.5*d.ric)), hi=escala(Math.min(d.max, d.q3+1.5*d.ric));
+  return `<line x1="${x0+ancho/2}" y1="${lo}" x2="${x0+ancho/2}" y2="${hi}" stroke="#93a0c8"/>
+    <rect x="${x0}" y="${q3}" width="${ancho}" height="${Math.max(q1-q3,1)}" rx="3" fill="#3b82f6" opacity=".55" stroke="#60a5fa"/>
+    <line x1="${x0}" y1="${me}" x2="${x0+ancho}" y2="${me}" stroke="#eef2ff" stroke-width="2.5"/>`;
+}
+function dispersion(c, nx, ny){
+  const W=680,H=340,L=52,B=44;
+  const xs=c.puntos.map(p=>p[0]), ys=c.puntos.map(p=>p[1]);
+  const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
+  const ex=(x1-x0)||1, ey=(y1-y0)||1;
+  const px=v=>L+((v-x0)/ex)*(W-L-20), py=v=>H-B-((v-y0)/ey)*(H-B-16);
+  let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  s+=`<line x1="${L}" y1="${H-B}" x2="${W-10}" y2="${H-B}" stroke="#2a3559"/><line x1="${L}" y1="10" x2="${L}" y2="${H-B}" stroke="#2a3559"/>`;
+  if(isFinite(c.b1)){
+    const ax=x0, bx=x1;
+    s+=`<line x1="${px(ax)}" y1="${py(c.b0+c.b1*ax)}" x2="${px(bx)}" y2="${py(c.b0+c.b1*bx)}" stroke="#fb923c" stroke-width="2.2" stroke-dasharray="6 4"/>`;
+  }
+  c.puntos.forEach(([a,b])=>{ s+=`<circle cx="${px(a)}" cy="${py(b)}" r="5" fill="#22d3ee" opacity=".8"/>`; });
+  s+=`<text x="${(W+L)/2}" y="${H-8}" text-anchor="middle" fill="#93a0c8" font-size="12">${esc(nx)}</text>`;
+  s+=`<text x="14" y="${(H-B)/2}" text-anchor="middle" fill="#93a0c8" font-size="12" transform="rotate(-90 14 ${(H-B)/2})">${esc(ny)}</text>`;
+  s+=`<text x="${L+4}" y="${H-B+16}" fill="#5d6b93" font-size="10">${fmt(x0,1)}</text><text x="${W-14}" y="${H-B+16}" text-anchor="end" fill="#5d6b93" font-size="10">${fmt(x1,1)}</text>`;
+  return s+'</svg>';
+}
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* =====================================================================
+   UNIVARIADO
+   ===================================================================== */
+function pintarUni(){
+  const q=PREG.find(p=>p.id===$('#selUni').value); if(!q) return;
+  const t=tipoDe(q), out=$('#outUni');
+  const vals=valores(q.id);
+  if(!vals.length){ out.innerHTML='<div class="vacio">Sin respuestas para esta variable.</div>'; return; }
+
+  let h=`<div style="margin:.9rem 0 .4rem"><span class="pill info">${etiquetaTipo[t]}</span>
+         <span class="pill">n = ${t==='multi'?FILAS.filter(f=>f[q.id]).length:vals.length}</span></div>`;
+
+  if(t==='cuant'){
+    const d=E.descriptivasNum(vals);
+    h+=`<div class="kpis">
+      ${kpi(fmt(d.media),'Media')}${kpi(fmt(d.mediana),'Mediana')}${kpi(d.modas.slice(0,2).join(', '),'Moda')}
+      ${kpi(fmt(d.ds),'Desv. estándar')}${kpi(fmt(d.min,0)+'–'+fmt(d.max,0),'Mín–Máx')}${kpi(pct(d.cv),'Coef. variación')}</div>`;
+    h+=histograma(d);
+    h+=`<div class="tabla-scroll"><table><tr><th class="cat">Medida</th><th>Valor</th><th class="cat">Qué indica</th></tr>
+      <tr><td class="cat">Media</td><td>${fmt(d.media)}</td><td class="cat">Centro aritmético; se corre con los valores extremos</td></tr>
+      <tr><td class="cat">Mediana</td><td>${fmt(d.mediana)}</td><td class="cat">Valor que parte al grupo en dos mitades; resistente a extremos</td></tr>
+      <tr><td class="cat">Q1 – Q3</td><td>${fmt(d.q1)} – ${fmt(d.q3)}</td><td class="cat">Entre estos valores está el 50 % central</td></tr>
+      <tr><td class="cat">Desviación estándar</td><td>${fmt(d.ds)}</td><td class="cat">Cuánto se apartan los casos de la media, en promedio</td></tr>
+      <tr><td class="cat">Coef. de variación</td><td>${pct(d.cv)}</td><td class="cat">Dispersión relativa; &gt; 30 % indica grupo heterogéneo</td></tr>
+      </table></div>`;
+    h+=`<details><summary>¿Cómo se calculan la media y la desviación estándar?</summary><div class="cuerpo">
+      <p>La <b>media</b> suma todos los valores y divide entre la cantidad de casos:</p>
+      <div class="formula">x̄ = Σxᵢ / n = ${fmt(d.suma)} / ${d.n} = ${fmt(d.media)}</div>
+      <p>La <b>desviación estándar</b> mide la dispersión. Se calcula en tres pasos:</p>
+      <div class="formula">1) restar la media a cada valor y elevar al cuadrado
+   Σ(xᵢ − x̄)² = ${fmt(d.sumaCuadrados)}
+
+2) dividir entre n − 1  →  varianza
+   s² = ${fmt(d.sumaCuadrados)} / ${d.n - 1} = ${fmt(d.varianza)}
+
+3) sacar la raíz cuadrada  →  desviación estándar
+   s = √${fmt(d.varianza)} = ${fmt(d.ds)}</div>
+      <p>Se divide entre <b>n − 1</b> y no entre n porque trabajamos con una muestra y no con toda
+      la población: esa corrección evita subestimar la dispersión real.</p>
+      <p>El <b>coeficiente de variación</b> es s / x̄ = ${fmt(d.ds)} / ${fmt(d.media)} = ${pct(d.cv)}.
+      Sirve para comparar la dispersión de variables medidas en unidades distintas.</p>
+      </div></details>`;
+    if(d.cv>0.3) h+=`<div class="nota aviso">El coeficiente de variación supera el 30 %: el grupo es
+      <b>heterogéneo</b> en esta variable. La media sola describe poco — conviene reportar también la mediana y el rango.</div>`;
+
+  }else{
+    // cualitativa / ordinal / multi / texto
+    let tf;
+    if(t==='multi'){
+      const planos=[]; FILAS.forEach(f=>{ const v=f[q.id]; if(v) (Array.isArray(v)?v:[v]).forEach(x=>planos.push(x)); });
+      tf=E.tablaFrecuencias(planos, q.opciones);
+      tf.base=FILAS.filter(f=>f[q.id]).length;
+    }else{
+      tf=E.tablaFrecuencias(vals, ordenDe(q)||q.opciones);
+    }
+    const ord = t==='ordinal';
+    h+=`<div class="kpis">
+      ${kpi(tf.modas.slice(0,1).map(m=>m.length>16?m.slice(0,16)+'…':m).join(''),'Moda')}
+      ${kpi(tf.k,'Categorías')}${kpi(tf.n,t==='multi'?'Menciones':'Respuestas')}
+      ${ord?kpi((E.medianaOrdinal(vals,ordenDe(q))||{}).categoria||'—','Mediana'):''}</div>`;
+    h+=barras(tf.filas);
+    h+=`<div class="tabla-scroll"><table><tr><th class="cat">Categoría</th><th>fᵢ</th><th>hᵢ</th>${ord?'<th>Fᵢ</th><th>Hᵢ</th>':''}</tr>`;
+    tf.filas.forEach(f=>{ h+=`<tr><td class="cat">${esc(f.cat)}</td><td>${f.fi}</td><td>${pct(f.hi)}</td>${ord?`<td>${f.Fi}</td><td>${pct(f.Hi)}</td>`:''}</tr>`; });
+    h+=`<tr><td class="cat"><b>Total</b></td><td><b>${tf.n}</b></td><td><b>100 %</b></td>${ord?'<td></td><td></td>':''}</tr></table></div>`;
+    h+=`<details><summary>¿Cómo se lee una tabla de frecuencias?</summary><div class="cuerpo">
+      <p><b>fᵢ</b> es la <b>frecuencia absoluta</b>: cuántos casos cayeron en esa categoría.</p>
+      <p><b>hᵢ</b> es la <b>frecuencia relativa</b>: fᵢ dividido entre el total, expresado en porcentaje.
+      Permite comparar aunque cambie el tamaño del grupo.</p>
+      ${ord?`<p><b>Fᵢ</b> y <b>Hᵢ</b> son las <b>acumuladas</b>: cuántos casos hay hasta esa categoría
+      inclusive. Solo tienen sentido acá porque las categorías tienen un orden natural.</p>`:
+      `<p>Esta variable es <b>nominal</b>: sus categorías no tienen orden, por eso no se calculan
+      frecuencias acumuladas ni media. La única medida de centro válida es la <b>moda</b>.</p>`}
+      ${t==='multi'?`<p class="nota aviso" style="display:block">Atención: esta es una pregunta de
+      <b>respuesta múltiple</b>. Los porcentajes se calculan sobre <b>${tf.n} menciones</b> hechas por
+      ${tf.base} personas, así que <b>suman más de 100 %</b> si se leen sobre personas. Siempre hay que
+      aclarar cuál es la base al reportar.</p>`:''}
+      </div></details>`;
+    if(t==='texto') h+=`<div class="nota neutro">Variable de <b>texto abierto</b>. Antes de analizarla en
+      serio hay que <b>categorizarla</b>: agrupar respuestas equivalentes bajo un mismo código. Acá se
+      muestran tal como se escribieron, por eso hay muchas categorías de frecuencia 1.</div>`;
+  }
+  out.innerHTML=h;
+}
+const kpi=(v,l)=>`<div class="kpi"><div class="v">${esc(v||'—')}</div><div class="l">${l}</div></div>`;
+
+/* =====================================================================
+   BIVARIADO
+   ===================================================================== */
+function pintarBi(){
+  const qx=PREG.find(p=>p.id===$('#selX').value), qy=PREG.find(p=>p.id===$('#selY').value);
+  const out=$('#outBi'); if(!qx||!qy) return;
+  if(qx.id===qy.id){ out.innerHTML='<div class="vacio">Elegí dos variables distintas.</div>'; return; }
+
+  const tx=tipoDe(qx), ty=tipoDe(qy);
+  if(tx==='multi'||ty==='multi'){
+    out.innerHTML=`<div class="nota aviso" style="margin-top:1rem">Una de las variables es de
+      <b>respuesta múltiple</b>. Cruzarla directamente rompe el supuesto de que cada persona aporta
+      un solo dato a la tabla. Para cruzarla habría que convertirla antes en varias variables
+      dicotómicas (una por opción: sí / no).</div>`; return;
+  }
+
+  const pares=FILAS.map(f=>[f[qx.id], f[qy.id]]).filter(p=>p[0]!=null&&p[0]!==''&&p[1]!=null&&p[1]!=='');
+  if(pares.length<3){ out.innerHTML='<div class="vacio">Muy pocos casos con ambas respuestas.</div>'; return; }
+
+  const catX = tx!=='cuant', catY = ty!=='cuant';
+  let h='';
+
+  /* ---- cuant × cuant ---- */
+  if(!catX && !catY){
+    const c=E.correlacion(pares.map(p=>[+p[0],+p[1]]));
+    h+=eleccion('Correlación de Pearson', 'Las dos variables son <b>cuantitativas</b>, así que se puede medir si crecen juntas.');
+    h+=`<div class="kpis">${kpi(fmt(c.r,3),'r de Pearson')}${kpi(pct(c.r2),'r² (varianza explicada)')}
+        ${kpi(fmt(c.p,4),'valor p')}${kpi(c.n,'Casos')}</div>`;
+    h+=dispersion(c, qx.texto, qy.texto);
+    h+=`<div class="nota ${c.p<0.05?'bien':'neutro'}"><b>${E.leerR(c.r)}.</b> ${E.leerP(c.p)}.</div>`;
+    h+=`<details><summary>¿Cómo se calcula r y qué es la recta?</summary><div class="cuerpo">
+      <p>El coeficiente <b>r de Pearson</b> compara cómo varían juntas las dos variables (covarianza)
+      contra cuánto varía cada una por su lado:</p>
+      <div class="formula">r = Σ(xᵢ−x̄)(yᵢ−ȳ) / √[ Σ(xᵢ−x̄)² · Σ(yᵢ−ȳ)² ]
+  = ${fmt(c.sxy)} / √(${fmt(c.sxx)} × ${fmt(c.syy)})
+  = ${fmt(c.r,4)}</div>
+      <p>Va de −1 a +1. Cerca de 0 no hay relación <b>lineal</b> (podría haber otra, curva, que r no detecta).</p>
+      <p><b>r² = ${fmt(c.r2,4)}</b> significa que ${pct(c.r2)} de la variación de una se asocia con la otra.
+      El resto responde a factores no medidos.</p>
+      <p>La <b>recta de regresión</b> es la que minimiza la suma de los errores al cuadrado:</p>
+      <div class="formula">ŷ = b₀ + b₁·x
+b₁ = Σ(xᵢ−x̄)(yᵢ−ȳ) / Σ(xᵢ−x̄)² = ${fmt(c.sxy)} / ${fmt(c.sxx)} = ${fmt(c.b1,4)}
+b₀ = ȳ − b₁·x̄ = ${fmt(c.mediaY)} − ${fmt(c.b1,4)}×${fmt(c.mediaX)} = ${fmt(c.b0,4)}</div>
+      <p>Se interpreta así: por cada unidad que sube <i>${esc(qx.texto)}</i>, <i>${esc(qy.texto)}</i>
+      cambia en promedio <b>${fmt(c.b1,3)}</b>.</p>
+      </div></details>`;
+    h+=`<div class="nota aviso"><b>Correlación no es causalidad.</b> Que dos variables se muevan juntas
+      no prueba que una cause la otra: puede haber una tercera variable detrás, o la relación puede ir
+      en sentido contrario al que uno imagina.</div>`;
+  }
+
+  /* ---- cual × cuant ---- */
+  else if(catX !== catY){
+    const qc = catX?qx:qy, qn = catX?qy:qx;
+    const pg=E.porGrupo(FILAS.map(f=>[f[qc.id], f[qn.id]]).filter(p=>p[0]!=null&&p[0]!==''&&isFinite(+p[1])));
+    if(!pg.grupos.length){ out.innerHTML='<div class="vacio">Sin datos suficientes.</div>'; return; }
+    const pr=pg.prueba;
+    h+=eleccion(pr?pr.tipo:'Comparación de medias',
+      `Se cruza una variable <b>cualitativa</b> (${esc(qc.texto)}) con una <b>cuantitativa</b>
+       (${esc(qn.texto)}): se comparan las medias de cada grupo.
+       ${pr? (pr.tipo.startsWith('t') ? 'Como hay <b>2 grupos</b>, corresponde una prueba t.'
+                                      : 'Como hay <b>3 o más grupos</b>, corresponde un ANOVA.') : ''}`);
+    h+=`<div class="tabla-scroll"><table><tr><th class="cat">Grupo</th><th>n</th><th>Media</th><th>Mediana</th><th>Desv.</th><th>Mín–Máx</th></tr>`;
+    pg.grupos.forEach(g=>{ h+=`<tr><td class="cat">${esc(g.cat)}</td><td>${g.n}</td><td><b>${fmt(g.media)}</b></td>
+      <td>${fmt(g.mediana)}</td><td>${fmt(g.ds)}</td><td>${fmt(g.min,0)}–${fmt(g.max,0)}</td></tr>`; });
+    h+=`<tr><td class="cat"><b>Total</b></td><td>${pg.N}</td><td><b>${fmt(pg.granMedia)}</b></td><td colspan="3"></td></tr></table></div>`;
+    h+=cajasComparadas(pg.grupos);
+
+    if(pr && pr.tipo.startsWith('t')){
+      h+=`<div class="kpis">${kpi(fmt(pr.t,3),'t')}${kpi(fmt(pr.gl,1),'gl')}${kpi(fmt(pr.p,4),'valor p')}${kpi(fmt(pr.d,2),'d de Cohen')}</div>`;
+      h+=`<div class="nota ${pr.p<0.05?'bien':'neutro'}">Diferencia de medias =
+        <b>${fmt(pr.dif)}</b>. ${E.leerP(pr.p)}.</div>`;
+      h+=`<details><summary>¿Cómo se construye la prueba t?</summary><div class="cuerpo">
+        <p>La lógica es comparar la <b>diferencia observada</b> contra el <b>error esperable por azar</b>:</p>
+        <div class="formula">t = (x̄₁ − x̄₂) / √(s₁²/n₁ + s₂²/n₂)
+  = (${fmt(pg.grupos[0].media)} − ${fmt(pg.grupos[1].media)}) / ${fmt(pr.ee,4)}
+  = ${fmt(pr.t,4)}     con gl ≈ ${fmt(pr.gl,2)}</div>
+        <p>Si t es grande, la diferencia es varias veces mayor que el ruido, y el valor p resulta chico.</p>
+        <p>Usamos la variante de <b>Welch</b>, que no exige que los dos grupos tengan la misma dispersión.</p>
+        <p>La <b>d de Cohen</b> = ${fmt(pr.d,3)} expresa la diferencia en desviaciones estándar. Referencia
+        habitual: 0,2 pequeño · 0,5 mediano · 0,8 grande. A diferencia de p, <b>no depende del tamaño de la muestra</b>.</p>
+        </div></details>`;
+    }else if(pr){
+      h+=`<div class="kpis">${kpi(fmt(pr.F,3),'F')}${kpi(pr.gl1+' , '+pr.gl2,'gl')}${kpi(fmt(pr.p,4),'valor p')}${kpi(pct(pr.eta2),'eta²')}</div>`;
+      h+=`<div class="nota ${pr.p<0.05?'bien':'neutro'}">${E.leerP(pr.p)}.
+        El grupo explica ${pct(pr.eta2)} de la variación total.</div>`;
+      h+=`<details><summary>¿Cómo se construye el ANOVA?</summary><div class="cuerpo">
+        <p>El ANOVA parte la variación total en dos: la que hay <b>entre</b> los grupos y la que hay
+        <b>dentro</b> de cada grupo.</p>
+        <div class="formula">SC entre  = Σ nⱼ(x̄ⱼ − x̄)²  = ${fmt(pr.sce)}   (gl = ${pr.gl1})
+SC dentro = Σ Σ (xᵢⱼ − x̄ⱼ)² = ${fmt(pr.scd)}   (gl = ${pr.gl2})
+SC total  = ${fmt(pr.sct)}
+
+CM entre  = ${fmt(pr.sce)} / ${pr.gl1} = ${fmt(pr.cme)}
+CM dentro = ${fmt(pr.scd)} / ${pr.gl2} = ${fmt(pr.cmd)}
+
+F = CM entre / CM dentro = ${fmt(pr.cme)} / ${fmt(pr.cmd)} = ${fmt(pr.F,4)}</div>
+        <p>Si los grupos fueran iguales, ambas fuentes de variación serían parecidas y F rondaría 1.
+        Cuanto más grande es F, más se separan los grupos entre sí respecto de su ruido interno.</p>
+        <p><b>eta² = SC entre / SC total = ${fmt(pr.eta2,4)}</b> → ${pct(pr.eta2)} de la variación se
+        asocia al grupo.</p>
+        <p class="nota aviso" style="display:block">El ANOVA dice que <b>al menos un grupo difiere</b>,
+        pero no cuál. Para saberlo hacen falta comparaciones posteriores.</p>
+        </div></details>`;
+    }
+    if(pg.grupos.some(g=>g.n<5))
+      h+=`<div class="nota aviso">Hay grupos con <b>menos de 5 casos</b>. Sus medias son muy inestables:
+        un solo dato distinto las mueve mucho. Tomá esa comparación como exploratoria.</div>`;
+  }
+
+  /* ---- cual × cual ---- */
+  else{
+    const c=E.contingencia(pares.map(p=>[String(p[0]),String(p[1])]), ordenDe(qx)||qx.opciones, ordenDe(qy)||qy.opciones);
+    h+=eleccion('Tabla de contingencia y chi-cuadrado',
+      'Las dos variables son <b>categóricas</b>: se cuenta cuántos casos caen en cada combinación y se compara con lo que se esperaría si no hubiera ninguna relación.');
+    h+=`<div class="kpis">${kpi(fmt(c.chi2,3),'chi²')}${kpi(c.gl,'gl')}${kpi(fmt(c.p,4),'valor p')}${kpi(fmt(c.cramer,3),'V de Cramér')}</div>`;
+
+    h+=`<h3 style="font-size:.95rem;margin:1rem 0 .2rem">Frecuencias observadas <span class="pill">y esperadas</span></h3>`;
+    h+=`<div class="tabla-scroll"><table><tr><th class="cat">${esc(corto(qx.texto))} \\ ${esc(corto(qy.texto))}</th>`;
+    c.Y.forEach(y=>h+=`<th>${esc(y)}</th>`); h+=`<th>Total</th></tr>`;
+    c.X.forEach((x,i)=>{
+      h+=`<tr><td class="cat">${esc(x)}</td>`;
+      c.Y.forEach((_,j)=>{
+        const o=c.O[i][j], e=c.E[i][j];
+        const cls = e>0 && o-e > Math.max(1.2, e*0.35) ? 'hi' : (e>0 && e-o > Math.max(1.2, e*0.35) ? 'lo' : '');
+        h+=`<td class="${cls}"><b>${o}</b><br><span style="font-size:.78em;color:#7c8ab5">${fmt(e,1)}</span></td>`;
+      });
+      h+=`<td><b>${c.totF[i]}</b></td></tr>`;
+    });
+    h+=`<tr><td class="cat"><b>Total</b></td>`; c.totC.forEach(t=>h+=`<td><b>${t}</b></td>`);
+    h+=`<td><b>${c.n}</b></td></tr></table></div>`;
+    h+=`<div class="leyenda"><span><i style="background:#1d3a5c"></i>observado por encima de lo esperado</span>
+        <span><i style="background:#3a1d2a"></i>por debajo</span>
+        <span>el número chico es la <b>frecuencia esperada</b></span></div>`;
+
+    h+=`<div class="nota ${c.p<0.05?'bien':'neutro'}"><b>${E.leerCramer(c.cramer)}</b> (V = ${fmt(c.cramer,3)}). ${E.leerP(c.p)}.</div>`;
+
+    if(!c.supuesto.cumple)
+      h+=`<div class="nota aviso"><b>Cuidado: no se cumple el supuesto del chi-cuadrado.</b>
+        ${c.supuesto.celdasBajas} de ${c.supuesto.total} celdas tienen frecuencia esperada menor a 5
+        (${pct(c.supuesto.pct)}). La prueba exige que la gran mayoría las supere, así que
+        <b>este valor p no es confiable</b>. Con un curso chico es lo habitual. Salidas posibles:
+        agrupar categorías parecidas, o quedarse en la descripción sin inferencia.</div>`;
+
+    h+=`<details><summary>¿Cómo se construye el chi-cuadrado, paso a paso?</summary><div class="cuerpo">
+      <p><b>Paso 1 — ¿Qué esperaríamos si NO hubiera relación?</b> Si las dos variables fueran
+      independientes, cada celda tendría:</p>
+      <div class="formula">Eᵢⱼ = (total de la fila × total de la columna) / n
+Ejemplo, celda «${esc(c.X[0])}» × «${esc(c.Y[0])}»:
+E = (${c.totF[0]} × ${c.totC[0]}) / ${c.n} = ${fmt(c.E[0][0],3)}
+observado = ${c.O[0][0]}</div>
+      <p><b>Paso 2 — ¿Cuánto se aparta lo observado de lo esperado?</b> En cada celda se calcula el
+      apartamiento al cuadrado, relativo a lo esperado, y se suman todas:</p>
+      <div class="formula">chi² = Σ (O − E)² / E = ${fmt(c.chi2,4)}</div>
+      <p>Las celdas que más aportan a ese total son las que marcan la relación:</p>
+      <div class="formula">${c.aportes.slice(0,3).map(a=>
+        `«${c.X[a.i]}» × «${c.Y[a.j]}» → aporta ${fmt(a.aporte,3)}  (O=${c.O[a.i][a.j]}, E=${fmt(c.E[a.i][a.j],2)})`).join('\n')}</div>
+      <p><b>Paso 3 — Grados de libertad:</b></p>
+      <div class="formula">gl = (filas − 1) × (columnas − 1) = (${c.X.length}−1) × (${c.Y.length}−1) = ${c.gl}</div>
+      <p><b>Paso 4 — El valor p</b> = ${fmt(c.p,4)}: probabilidad de obtener un chi² de ${fmt(c.chi2,2)}
+      o mayor si en realidad no hubiera ninguna relación.</p>
+      <p><b>Paso 5 — La fuerza.</b> El chi² crece con el tamaño de la muestra, así que no sirve para
+      medir intensidad. Para eso se usa la <b>V de Cramér</b>, que va de 0 a 1:</p>
+      <div class="formula">V = √( chi² / (n × (mín(filas,columnas) − 1)) )
+  = √( ${fmt(c.chi2,3)} / (${c.n} × ${Math.min(c.X.length,c.Y.length)-1}) ) = ${fmt(c.cramer,4)}</div>
+      </div></details>`;
+  }
+  out.innerHTML=h;
+}
+const corto = s => s.length>26?s.slice(0,26)+'…':s;
+const eleccion=(nombre,por)=>`<div class="nota neutro" style="margin-top:1rem">
+  <span class="pill info">análisis elegido</span> <b style="color:var(--txt)">${nombre}</b><br>${por}</div>`;
+
+function cajasComparadas(grupos){
+  const W=680, H=Math.max(170, 40+grupos.length*0), alto=200;
+  const todos=grupos.flatMap(g=>g.datos);
+  const min=Math.min(...todos), max=Math.max(...todos), ext=(max-min)||1;
+  const T=22, B=34;
+  const esc_=v=>T+(1-(v-min)/ext)*(alto-T-B);
+  const bw=Math.min(70,(W-70)/grupos.length-18);
+  let s=`<svg viewBox="0 0 ${W} ${alto}">`;
+  s+=`<line x1="46" y1="${T}" x2="46" y2="${alto-B}" stroke="#2a3559"/>`;
+  s+=`<text x="40" y="${esc_(max)+4}" text-anchor="end" fill="#5d6b93" font-size="10">${fmt(max,0)}</text>`;
+  s+=`<text x="40" y="${esc_(min)+4}" text-anchor="end" fill="#5d6b93" font-size="10">${fmt(min,0)}</text>`;
+  grupos.forEach((g,i)=>{
+    const x0=64+i*((W-80)/grupos.length);
+    s+=caja(g,x0,bw,esc_);
+    s+=`<circle cx="${x0+bw/2}" cy="${esc_(g.media)}" r="3.5" fill="#fb923c"/>`;
+    const et=String(g.cat).length>13?String(g.cat).slice(0,13)+'…':g.cat;
+    s+=`<text x="${x0+bw/2}" y="${alto-B+15}" text-anchor="middle" fill="#93a0c8" font-size="10.5">${esc(et)}</text>`;
+    s+=`<text x="${x0+bw/2}" y="${alto-B+27}" text-anchor="middle" fill="#5d6b93" font-size="9.5">n=${g.n}</text>`;
+  });
+  s+='</svg>';
+  return s+`<div class="leyenda"><span>la caja va de Q1 a Q3</span><span>línea blanca = mediana</span>
+    <span><i style="background:#fb923c;border-radius:50%"></i>media</span></div>`;
+}
+
+/* =====================================================================
+   DATOS DE ENSAYO
+   ===================================================================== */
+function demo(){
+  const rnd=(a)=>a[Math.floor(Math.random()*a.length)];
+  const norm=(m,s)=>{ let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random();
+    return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+  PREG=[
+    {id:'edad',texto:'¿Qué edad tenés?',tipo:'numero'},
+    {id:'trabaja',texto:'¿Trabajás actualmente?',tipo:'opcion',opciones:['No, solo estudio','Sí, en algo de sonido','Sí, en otra área']},
+    {id:'tiempo_uni',texto:'¿Cuánto tardás en llegar a la universidad?',tipo:'opcion',ordinal:true,
+     opciones:['Menos de 15 min','Entre 15 y 30 min','Entre 30 min y 1 hora','Más de 1 hora']},
+    {id:'horas_estudio',texto:'Horas de estudio por semana',tipo:'numero'},
+    {id:'copiar_pegar',texto:'¿Copiás y pegás o te detenés a leer?',tipo:'opcion',
+     opciones:['Copio y pego directo','Leo por encima y pego','Leo todo y reescribo','Depende de la urgencia']},
+    {id:'area_sonido',texto:'¿Qué área del sonido te interesa más?',tipo:'opcion',
+     opciones:['Acústica arquitectónica','Producción musical','Procesamiento de señales','Audio en vivo','Diseño sonoro / medios']},
+    {id:'musico',texto:'¿Sos músico?',tipo:'opcion',opciones:['Sí, toco un instrumento','Sí, canto','Sí, produzco','No']},
+    {id:'generos',texto:'Géneros musicales preferidos',tipo:'multi',
+     opciones:['Rock','Metal','Pop','Hip hop / Rap','Electrónica','Jazz','Clásica','Folklore','Cumbia']},
+  ];
+  FILAS=Array.from({length:30},(_,i)=>{
+    const trabaja=rnd(['No, solo estudio','No, solo estudio','Sí, en algo de sonido','Sí, en otra área']);
+    // relación deliberada: quien trabaja estudia menos horas
+    const base = trabaja==='No, solo estudio' ? 12 : 7;
+    const gs=[...new Set(Array.from({length:1+Math.floor(Math.random()*3)},()=>
+      rnd(['Rock','Metal','Pop','Hip hop / Rap','Electrónica','Jazz','Clásica','Folklore','Cumbia'])))];
+    return {
+      _id:'d'+i,
+      edad: Math.round(norm(23,3.4)),
+      trabaja,
+      tiempo_uni: rnd(['Menos de 15 min','Entre 15 y 30 min','Entre 15 y 30 min','Entre 30 min y 1 hora','Más de 1 hora']),
+      horas_estudio: Math.max(1, Math.round(norm(base,3))),
+      copiar_pegar: rnd(['Copio y pego directo','Leo por encima y pego','Leo todo y reescribo','Depende de la urgencia']),
+      area_sonido: rnd(['Acústica arquitectónica','Producción musical','Producción musical','Procesamiento de señales','Audio en vivo','Diseño sonoro / medios']),
+      musico: rnd(['Sí, toco un instrumento','Sí, toco un instrumento','Sí, canto','Sí, produzco','No']),
+      generos: gs,
+    };
+  });
+  listo('30 casos simulados');
+}
+
+/* =====================================================================
+   EVENTOS
+   ===================================================================== */
+$('#drop').onclick=()=>$('#file').click();
+$('#file').onchange=e=>{ const f=e.target.files[0]; if(f) leerArchivo(f); };
+['dragenter','dragover'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault(); $('#drop').classList.add('over');}));
+['dragleave','drop'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault(); $('#drop').classList.remove('over');}));
+$('#drop').addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) leerArchivo(f); });
+
+function leerArchivo(f){
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      PREG=[]; FILAS=[];
+      if(/\.json$/i.test(f.name)) desdeJSON(JSON.parse(r.result));
+      else desdeCSV(r.result);
+      listo(f.name);
+    }catch(err){
+      $('#estadoDatos').innerHTML=`<div class="nota aviso">No pude leer el archivo: ${esc(err.message)}</div>`;
+    }
+  };
+  r.readAsText(f,'utf-8');
+}
+
+// sesiones guardadas en este navegador (modo local de la encuesta)
+(function(){
+  const claves=Object.keys(localStorage).filter(k=>/^son514:[A-Z]{4,8}$/.test(k));
+  if(!claves.length) return;
+  $('#selSesion').innerHTML=claves.map(k=>`<option value="${k}">${k.split(':')[1]}</option>`).join('');
+})();
+$('#btnSesion').onclick=()=>{
+  const k=$('#selSesion').value; if(!k) return;
+  try{
+    const d=JSON.parse(localStorage.getItem(k));
+    PREG=[]; FILAS=[];
+    // las definiciones viven en index.html; si no están, se infieren del CSV/JSON
+    desdeJSON({ preguntas: (window.opener&&window.opener.PREGUNTAS)||PREG_FALLBACK, datos:d });
+    listo('sesión '+k.split(':')[1]);
+  }catch(e){ $('#estadoDatos').innerHTML='<div class="nota aviso">No pude leer esa sesión.</div>'; }
+};
+$('#btnDemo').onclick=demo;
+$('#selUni').onchange=pintarUni;
+$('#selX').onchange=pintarBi;
+$('#selY').onchange=pintarBi;
+$$('.tab').forEach(t=>t.onclick=()=>{
+  $$('.tab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+  $('#vUni').style.display  = t.dataset.v==='uni' ?'block':'none';
+  $('#vBi').style.display   = t.dataset.v==='bi'  ?'block':'none';
+  $('#vGuia').style.display = t.dataset.v==='guia'?'block':'none';
+});
+
+// definiciones mínimas por si se carga una sesión sin metadatos
+const PREG_FALLBACK=[];
+</script>
+</body>
+</html>
