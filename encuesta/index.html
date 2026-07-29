@@ -10,6 +10,9 @@
     --acc:#5b8cff; --acc2:#22d3ee; --ok:#34d399; --warn:#fbbf24; --danger:#f87171;
     --f: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --safe-b: env(safe-area-inset-bottom, 0px);
+    /* curvas de easing: fuertes, no las genéricas de CSS — se sienten más intencionales */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;height:100%}
@@ -24,10 +27,13 @@
   .btn{
     border:1px solid var(--line); background:linear-gradient(180deg,#233059,#1a2444);
     color:var(--txt); padding:.7rem 1.1rem; border-radius:.7rem; font-size:1rem;
-    cursor:pointer; font-weight:600; transition:.15s; white-space:nowrap;
+    cursor:pointer; font-weight:600; white-space:nowrap;
+    transition:transform 120ms var(--ease-out), border-color 150ms var(--ease-out), background 150ms var(--ease-out);
   }
   .btn:hover{border-color:var(--acc)}
+  .btn:active{transform:scale(0.97)}
   .btn:disabled{opacity:.4; cursor:not-allowed}
+  .btn:disabled:active{transform:none}
   .btn.primary{background:linear-gradient(180deg,#3b6ef5,#2a54c9); border-color:#4d7dff}
   .btn.ghost{background:transparent}
   .btn.sm{padding:.45rem .8rem; font-size:.85rem}
@@ -46,15 +52,21 @@
     background:linear-gradient(180deg, rgba(24,34,64,.92), rgba(19,26,48,.92));
     border:1px solid var(--line); border-radius:1.2rem; padding:clamp(1.3rem,4vw,2rem);
     max-width:640px; width:100%; box-shadow:0 30px 80px rgba(0,0,0,.5);
+    opacity:0; transform:translateY(10px) scale(.98);
+    animation:cardIn 500ms var(--ease-out) forwards;
   }
+  @keyframes cardIn{ to{ opacity:1; transform:translateY(0) scale(1); } }
   .card h1{margin:.2rem 0 .3rem; font-size:clamp(1.3rem,4.5vw,1.6rem); letter-spacing:-.02em}
   .card .sub{color:var(--dim); font-size:.95rem; margin-bottom:1.5rem; line-height:1.5}
   .choice{display:grid; gap:.8rem}
   .choice a{
     display:block; text-decoration:none; color:var(--txt); border:1px solid var(--line);
-    background:#141d38; padding:1.1rem 1.3rem; border-radius:.9rem; transition:.15s;
+    background:#141d38; padding:1.1rem 1.3rem; border-radius:.9rem;
+    transition:transform 150ms var(--ease-out), border-color 150ms var(--ease-out), background 150ms var(--ease-out);
   }
   .choice a:hover{border-color:var(--acc); background:#182246}
+  @media (hover:hover) and (pointer:fine){ .choice a:hover{transform:translateY(-1px)} }
+  .choice a:active{transform:scale(0.985)}
   .choice b{display:block; font-size:1.1rem; margin-bottom:.15rem}
   .choice span{color:var(--dim); font-size:.88rem}
 
@@ -149,21 +161,27 @@
   .inp{
     width:100%; background:#0f1730; border:1px solid var(--line); color:var(--txt);
     padding:1rem; border-radius:.8rem; font-size:1.1rem; font-family:inherit;
+    transition:border-color 150ms var(--ease-out);
   }
   .inp:focus{outline:none; border-color:var(--acc)}
   .opts{display:grid; gap:.55rem}
   .opt{
     border:1px solid var(--line); background:#131c38; padding:.9rem 1rem; border-radius:.8rem;
-    cursor:pointer; font-size:1.02rem; transition:.12s; display:flex; align-items:center; gap:.7rem;
+    cursor:pointer; font-size:1.02rem; display:flex; align-items:center; gap:.7rem;
+    transition:transform 110ms var(--ease-out), border-color 130ms var(--ease-out), background 130ms var(--ease-out);
   }
   .opt:hover{border-color:var(--acc)}
+  .opt:active{transform:scale(0.98)}
   .opt.sel{background:#23407f; border-color:var(--acc)}
-  .opt .bx{flex:none; width:22px; height:22px; border-radius:6px; border:2px solid var(--line); display:grid; place-items:center; font-size:.78rem}
+  .opt .bx{flex:none; width:22px; height:22px; border-radius:6px; border:2px solid var(--line); display:grid; place-items:center; font-size:.78rem; transition:background 130ms var(--ease-out), border-color 130ms var(--ease-out)}
   .opt.sel .bx{background:var(--acc); border-color:var(--acc)}
-  .chk{display:flex; align-items:center; gap:.7rem; padding:.9rem 1rem; border:1px solid var(--line); border-radius:.8rem; background:#131c38; cursor:pointer; font-size:.98rem}
+  .chk{display:flex; align-items:center; gap:.7rem; padding:.9rem 1rem; border:1px solid var(--line); border-radius:.8rem; background:#131c38; cursor:pointer; font-size:.98rem; transition:transform 110ms var(--ease-out), border-color 130ms var(--ease-out), background 130ms var(--ease-out)}
+  .chk:active{transform:scale(0.98)}
   .chk.sel{background:#23407f; border-color:var(--acc)}
-  .chk .bx{flex:none; width:22px; height:22px; border-radius:6px; border:2px solid var(--line); display:grid; place-items:center; font-size:.78rem}
+  .chk .bx{flex:none; width:22px; height:22px; border-radius:6px; border:2px solid var(--line); display:grid; place-items:center; font-size:.78rem; transition:background 130ms var(--ease-out), border-color 130ms var(--ease-out)}
   .chk.sel .bx{background:var(--acc); border-color:var(--acc)}
+  #aBody.reentra{ animation:qIn 220ms var(--ease-out); }
+  @keyframes qIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
   .wait{text-align:center; color:var(--dim); padding:2.5rem 1rem}
   .wait .dot{display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--acc); margin:0 3px; animation:b 1.2s infinite}
   .wait .dot:nth-child(2){animation-delay:.2s} .wait .dot:nth-child(3){animation-delay:.4s}
@@ -176,6 +194,27 @@
   #modo.local{border-color:var(--warn); color:var(--warn)}
   #toast{position:fixed; left:50%; bottom:calc(1.5rem + var(--safe-b)); transform:translateX(-50%) translateY(200%); z-index:60; background:#1c2748; border:1px solid var(--acc); padding:.8rem 1.2rem; border-radius:.7rem; transition:.35s; font-size:.9rem; max-width:90vw; text-align:center}
   #toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* ---------- modal de contraseña ---------- */
+  #gateOverlay{position:fixed; inset:0; z-index:100; display:grid; place-items:center;
+    background:rgba(6,9,20,.72); backdrop-filter:blur(4px); padding:1.2rem}
+  #gateOverlay.hidden{display:none}
+  #gateCard{background:linear-gradient(180deg,#182240,#131a30); border:1px solid var(--line);
+    border-radius:1rem; padding:1.6rem; max-width:360px; width:100%;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);
+    opacity:0; transform:translateY(8px) scale(.98); animation:gateIn 220ms var(--ease-out) forwards}
+  @keyframes gateIn{ to{opacity:1; transform:translateY(0) scale(1)} }
+  #gateCard .ic{font-size:2rem; text-align:center; margin-bottom:.3rem}
+  #gateCard h3{margin:.2rem 0 .8rem; text-align:center; font-size:1.05rem; letter-spacing:-.01em}
+  #gateCard input{width:100%; background:#0f1730; border:1px solid var(--line); color:var(--txt);
+    padding:.75rem .9rem; border-radius:.6rem; font-size:1rem; font-family:inherit; letter-spacing:.08em;
+    transition:border-color 150ms var(--ease-out)}
+  #gateCard input:focus{outline:none; border-color:var(--acc)}
+  #gateCard input.error{border-color:var(--danger); animation:gateShake 300ms}
+  @keyframes gateShake{ 20%,60%{transform:translateX(-4px)} 40%,80%{transform:translateX(4px)} }
+  #gateCard button{width:100%; margin-top:.7rem}
+  #gateCard .link{display:block; text-align:center; margin-top:.7rem; font-size:.82rem; color:var(--dim); cursor:pointer}
+  #gateMsg{color:var(--danger); font-size:.8rem; text-align:center; margin-top:.5rem; min-height:1.1em}
 
   /* ---------- responsive ---------- */
   @media (max-width:1024px){
@@ -229,9 +268,10 @@
       <img id="qr" alt="Código QR para estudiantes">
     </div>
 
+    <p style="color:var(--dim); font-size:.78rem; line-height:1.45; margin:0">
+      Cada estudiante avanza <b style="color:var(--txt)">a su propio ritmo</b>, sin esperar
+      al resto. Elegí una pregunta de la lista (o usá ← →) para proyectar sus resultados en vivo.</p>
     <div class="ctrls">
-      <button class="btn primary" id="btnLanzar">▶ Lanzar</button>
-      <button class="btn" id="btnCerrar">⏸ Cerrar</button>
       <button class="btn ghost sm" id="btnPrev">← Anterior</button>
       <button class="btn ghost sm" id="btnNext">Siguiente →</button>
     </div>
@@ -239,10 +279,10 @@
 
     <hr>
     <div class="stat"><span>Conectados</span><b id="nConn">0</b></div>
-    <div class="stat"><span>Respuestas</span><b id="nResp">0</b></div>
-    <div class="stat"><span>Estado</span><b id="estadoTxt">en espera</b></div>
-    <div class="stat"><span>Tiempo en pregunta</span><b id="crono">0:00</b></div>
-    <div class="stat"><span>Duración estimada</span><b id="estimado">—</b></div>
+    <div class="stat"><span>Completaron toda la encuesta</span><b id="nCompletos">0</b></div>
+    <div class="stat"><span>Respuestas (esta pregunta)</span><b id="nResp">0</b></div>
+    <div class="stat"><span>Viendo</span><b id="estadoTxt">sin selección</b></div>
+    <div class="stat"><span>Duración estimada c/u</span><b id="estimado">—</b></div>
     <hr>
 
     <div class="qlist" id="qlist"></div>
@@ -259,7 +299,7 @@
     <div id="stageHead">
       <span class="pill" id="qBloque">—</span>
       <span class="pill" id="qRitmo" style="display:none"></span>
-      <div id="qTexto">Presioná “Lanzar” para comenzar</div>
+      <div id="qTexto">Elegí una pregunta de la lista para ver resultados en vivo</div>
       <div id="qHint"></div>
     </div>
     <div id="balloons"></div>
@@ -300,6 +340,17 @@
 
 <div id="modo" class="hidden"></div>
 <div id="toast"></div>
+
+<div id="gateOverlay" class="hidden">
+  <div id="gateCard">
+    <div class="ic">🔒</div>
+    <h3>Acceso restringido</h3>
+    <input type="password" id="gatePwd" placeholder="Contraseña" autocomplete="off">
+    <button class="btn primary" id="gateBtn">Entrar</button>
+    <div id="gateMsg"></div>
+    <span class="link" id="gateCancelar">← Volver al inicio</span>
+  </div>
+</div>
 
 <script type="module">
 /* =====================================================================
@@ -448,7 +499,7 @@ class LocalSync {
     this.bc.onmessage = () => this.emit();
     addEventListener('storage', e => { if(e.key===this.k) this.emit(); });
   }
-  _vacio(){ return { estado:{idx:-1,abierta:false,aviso:false}, respuestas:{}, participantes:{} }; }
+  _vacio(){ return { estado:{idx:-1,aviso:false}, respuestas:{}, participantes:{} }; }
   _read(){ try{ return JSON.parse(localStorage.getItem(this.k)) || this._vacio(); }catch(e){ return this._vacio(); } }
   _write(d){ localStorage.setItem(this.k, JSON.stringify(d)); this.bc.postMessage(1); this.emit(); }
   emit(){ const d=this._read(); this.subs.forEach(f=>f(d)); }
@@ -464,7 +515,7 @@ class FireSync {
     this.cod=cod; this.db=db; this.api=api; this.base=`sesiones/${cod}`; this.subs=[]; this.cache=null;
     api.onValue(api.ref(db,this.base), snap => {
       const v = snap.val() || {};
-      v.estado ||= {idx:-1,abierta:false,aviso:false}; v.respuestas ||= {}; v.participantes ||= {};
+      v.estado ||= {idx:-1,aviso:false}; v.respuestas ||= {}; v.participantes ||= {};
       this.cache=v; this.subs.forEach(f=>f(v));
     });
   }
@@ -472,7 +523,7 @@ class FireSync {
   setEstado(e){ this.api.set(this.api.ref(this.db, this.base+'/estado'), e); }
   responder(qid,pid,valor){ this.api.set(this.api.ref(this.db, `${this.base}/respuestas/${qid}/${pid}`), {valor,ts:Date.now()}); }
   presencia(pid){ this.api.set(this.api.ref(this.db, `${this.base}/participantes/${pid}`), Date.now()); }
-  reset(){ this.api.set(this.api.ref(this.db, this.base), { estado:{idx:-1,abierta:false,aviso:false} }); }
+  reset(){ this.api.set(this.api.ref(this.db, this.base), { estado:{idx:-1,aviso:false} }); }
 }
 
 /* =====================================================================
@@ -492,7 +543,7 @@ localStorage.setItem('son514:ultimoCodigo', COD);
 function pidGen(){ let p=localStorage.getItem('son514:pid'); if(!p){ p='p'+Math.random().toString(36).slice(2,10); localStorage.setItem('son514:pid',p);} return p; }
 const PID = pidGen();
 
-let sync, DATA = { estado:{idx:-1,abierta:false,aviso:false}, respuestas:{}, participantes:{} };
+let sync, DATA = { estado:{idx:-1,aviso:false}, respuestas:{}, participantes:{} };
 
 async function initSync(){
   if(hayFirebase){
@@ -526,12 +577,28 @@ function duracionTotal(){
   return Math.round(s/60);
 }
 
-/* ---- protección con contraseña ---- */
+/* ---- protección con contraseña (modal propio; no usa prompt() — algunos
+   navegadores/WebViews lo bloquean, y eso rompería toda la vista si no se captura) ---- */
+const CLAVE_DOCENTE='CPZT2022';
 function pedirContrasena(funcion){
-  const pwd=prompt('Contraseña para acceso restringido:','');
-  if(pwd==='CPZT2022'){ funcion(); }
-  else if(pwd!==null){ alert('Contraseña incorrecta'); location.hash='#'; }
-  else location.hash='#';
+  if(localStorage.getItem('son514:docente_ok')==='1'){ funcion(); return; }
+  const ov=$('#gateOverlay'), inp=$('#gatePwd'), msg=$('#gateMsg');
+  ov.classList.remove('hidden'); inp.value=''; msg.textContent='';
+  setTimeout(()=>inp.focus(),150);
+  const intentar=()=>{
+    if(inp.value===CLAVE_DOCENTE){
+      localStorage.setItem('son514:docente_ok','1');
+      ov.classList.add('hidden');
+      funcion();
+    }else{
+      msg.textContent='Contraseña incorrecta';
+      inp.classList.remove('error'); void inp.offsetWidth; inp.classList.add('error');
+      inp.value=''; inp.focus();
+    }
+  };
+  $('#gateBtn').onclick=intentar;
+  inp.onkeydown=e=>{ if(e.key==='Enter') intentar(); };
+  $('#gateCancelar').onclick=()=>{ ov.classList.add('hidden'); location.hash='#'; };
 }
 
 /* ---- ruteo ---- */
@@ -541,6 +608,7 @@ function ruta(){
   $('#docente').classList.toggle('hidden', h!=='docente');
   $('#alumno').classList.toggle('hidden', h!=='responder');
   if(h==='docente') pedirContrasena(initDocente);
+  else $('#gateOverlay').classList.add('hidden');
   if(h==='responder') initAlumno();
 }
 addEventListener('hashchange', ruta);
@@ -548,7 +616,7 @@ addEventListener('hashchange', ruta);
 /* =====================================================================
    VISTA DOCENTE
    ===================================================================== */
-let docenteListo=false, tIni=0, vistoIdx=null, vistoAbierta=null;
+let docenteListo=false;
 function initDocente(){
   if(docenteListo) return; docenteListo=true;
 
@@ -567,16 +635,14 @@ function initDocente(){
     d.innerHTML=`<span class="n">${i+1}</span><span class="t"></span><span class="mk"></span>`;
     d.querySelector('.t').textContent=q.texto;
     d.querySelector('.mk').textContent = (q.ritmo==='comentada'?'💬':'') + (q.privada?'🔒':'');
-    d.title = `${q.ritmo==='comentada'?'Comentada':'Rápida'} · ~${q.seg}s`;
-    d.onclick=()=>{ sync.setEstado({idx:i, abierta:true, aviso:false}); cerrarPanel(); };
+    d.title = q.ritmo==='comentada' ? 'Para comentar en clase' : 'Respuesta rápida';
+    d.onclick=()=>{ sync.setEstado({idx:i, aviso:false}); cerrarPanel(); };
     lista.appendChild(d);
   });
 
-  $('#btnLanzar').onclick=()=>sync.setEstado({idx: DATA.estado.idx<0?0:DATA.estado.idx, abierta:true, aviso:false});
-  $('#btnCerrar').onclick=()=>sync.setEstado({...DATA.estado, abierta:false});
-  $('#btnPrev').onclick  =()=>sync.setEstado({idx:Math.max(0,DATA.estado.idx-1), abierta:true, aviso:false});
-  $('#btnNext').onclick  =()=>sync.setEstado({idx:Math.min(PREGUNTAS.length-1,DATA.estado.idx+1), abierta:true, aviso:false});
-  $('#btnAviso').onclick =()=>sync.setEstado({idx:-1, abierta:false, aviso:!DATA.estado.aviso});
+  $('#btnPrev').onclick  =()=>sync.setEstado({idx:Math.max(0,DATA.estado.idx-1), aviso:false});
+  $('#btnNext').onclick  =()=>sync.setEstado({idx:Math.min(PREGUNTAS.length-1,DATA.estado.idx+1), aviso:false});
+  $('#btnAviso').onclick =()=>sync.setEstado({idx:-1, aviso:!DATA.estado.aviso});
   $('#btnCSV').onclick=exportarCSV;
   $('#btnJSON').onclick=exportarJSON;
   $('#btnReset').onclick=()=>{ if(confirm('¿Borrar todas las respuestas de la sesión '+COD+'?')){ sync.reset(); toast('Sesión reiniciada'); } };
@@ -589,33 +655,15 @@ function initDocente(){
     if(e.target.tagName==='INPUT') return;
     if(e.key==='ArrowRight') $('#btnNext').click();
     if(e.key==='ArrowLeft')  $('#btnPrev').click();
-    if(e.key===' '){ e.preventDefault(); DATA.estado.abierta ? $('#btnCerrar').click() : $('#btnLanzar').click(); }
   });
 
-  setInterval(()=>{
-    if(!DATA.estado.abierta || DATA.estado.idx<0 || !tIni){ $('#crono').textContent='0:00'; $('#crono').style.color='var(--txt)'; return; }
-    const s=Math.floor((Date.now()-tIni)/1000);
-    const q=PREGUNTAS[DATA.estado.idx];
-    $('#crono').textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-    $('#crono').style.color = q && s > q.seg*1.6 ? 'var(--warn)' : 'var(--txt)';
-  },1000);
-
-  sync.onData(d=>{
-    // el cambio se mide contra estado propio: DATA es compartida y puede
-    // haber sido mutada ya por otro suscriptor (vista alumno en la misma pestaña)
-    if(d.estado.idx!==vistoIdx || d.estado.abierta!==vistoAbierta){
-      vistoIdx=d.estado.idx; vistoAbierta=d.estado.abierta;
-      tIni = (d.estado.abierta && d.estado.idx>=0) ? Date.now() : 0;
-    }
-    DATA=d;
-    pintarDocente();
-  });
+  sync.onData(d=>{ DATA=d; pintarDocente(); });
   animar();
 }
 function cerrarPanel(){ $('#panel').classList.remove('abierto'); $('#backdrop').classList.remove('show'); }
 
 function pintarDocente(){
-  const {idx, abierta, aviso} = DATA.estado;
+  const {idx, aviso} = DATA.estado;
   const q = PREGUNTAS[idx];
 
   $('#avisoProy').classList.toggle('show', !!aviso);
@@ -627,19 +675,19 @@ function pintarDocente(){
   });
 
   $('#nConn').textContent = Object.keys(DATA.participantes||{}).length;
-  $('#estadoTxt').textContent = idx<0 ? (aviso?'aviso en pantalla':'en espera') : (abierta?'recibiendo':'cerrada');
-  $('#estadoTxt').style.color = abierta ? 'var(--ok)' : 'var(--dim)';
+  $('#nCompletos').textContent = Object.keys(DATA.respuestas['nombre']||{}).length;
+  $('#estadoTxt').textContent = idx<0 ? (aviso?'aviso en pantalla':'sin selección') : `${idx+1} / ${PREGUNTAS.length}`;
 
   if(!q){
     $('#qBloque').textContent='—'; $('#qRitmo').style.display='none';
-    $('#qTexto').textContent = aviso ? '' : 'Presioná “Lanzar” para comenzar';
+    $('#qTexto').textContent = aviso ? '' : 'Elegí una pregunta de la lista para ver resultados en vivo';
     $('#qHint').textContent=''; $('#nResp').textContent='0'; $('#cBig').textContent='0';
     $('#privado').classList.remove('show'); setBalloons([]); return;
   }
 
   $('#qBloque').textContent=q.bloque;
   const rp=$('#qRitmo'); rp.style.display='inline-block';
-  rp.textContent = q.ritmo==='comentada' ? `💬 comentada · ~${q.seg}s` : `⚡ rápida · ~${q.seg}s`;
+  rp.textContent = q.ritmo==='comentada' ? '💬 para comentar en clase' : '⚡ respuesta rápida';
   rp.className = 'pill '+(q.ritmo==='comentada'?'lento':'rapido');
   $('#qTexto').textContent=q.texto;
   $('#qHint').textContent=q.hint||'';
@@ -805,8 +853,17 @@ function bajar(txt,nombre,mime){
 /* =====================================================================
    VISTA ALUMNO
    ===================================================================== */
-let alumnoListo=false, ultimoIdx=null, seleccion=[], anonimo=false;
+let alumnoListo=false, ultimoQid=null, seleccion=[], anonimo=false;
 const KEY_AVISO='son514:aviso:'+COD;
+
+/* primera pregunta aplicable a este participante que todavía no respondió */
+function siguientePendiente(){
+  for(const q of PREGUNTAS){
+    if(!aplica(q, PID)) continue;
+    if(!(DATA.respuestas[q.id]||{})[PID]) return q;
+  }
+  return null; // completó todas las que le correspondían
+}
 
 function initAlumno(){
   if(alumnoListo) return; alumnoListo=true;
@@ -815,13 +872,15 @@ function initAlumno(){
   sync.onData(d=>{ DATA=d; pintarAlumno(); });
 }
 
+function reanimar(el){ el.classList.remove('reentra'); void el.offsetWidth; el.classList.add('reentra'); }
+
 function pintarAlumno(){
   const body=$('#aBody');
 
   // 1) aviso ético obligatorio
   if(localStorage.getItem(KEY_AVISO)!=='1'){
     if(body.dataset.vista==='aviso') return;
-    body.dataset.vista='aviso';
+    body.dataset.vista='aviso'; reanimar(body);
     $('#aProg').textContent='—'; $('#aBloque').textContent='Aviso';
     body.innerHTML='';
     const w=document.createElement('div');
@@ -842,47 +901,27 @@ function pintarAlumno(){
     const b=document.createElement('button');
     b.className='btn primary big'; b.textContent='Entendido, empezar';
     b.style.marginTop='1rem';
-    b.onclick=()=>{ localStorage.setItem(KEY_AVISO,'1'); body.dataset.vista=''; ultimoIdx=null; pintarAlumno(); };
+    b.onclick=()=>{ localStorage.setItem(KEY_AVISO,'1'); body.dataset.vista=''; ultimoQid=null; pintarAlumno(); };
     w.appendChild(b); body.appendChild(w);
     return;
   }
 
-  const {idx, abierta}=DATA.estado;
-  const q=PREGUNTAS[idx];
-  $('#aProg').textContent = q ? `${idx+1} / ${PREGUNTAS.length}` : '—';
+  const q=siguientePendiente();
+  $('#aProg').textContent = q ? `${PREGUNTAS.indexOf(q)+1} / ${PREGUNTAS.length}` : 'Completo';
   $('#aBloque').textContent = q ? q.bloque : 'SON-514';
 
-  if(!q || !abierta){
-    if(body.dataset.vista==='espera') return;
-    body.dataset.vista='espera'; ultimoIdx=null;
-    body.innerHTML=`<div class="wait"><p style="font-size:1.05rem">${q&&!abierta?'Pregunta cerrada':'Esperando la siguiente pregunta'}</p>
-      <div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-      <p style="margin-top:1.4rem;font-size:.85rem">Sesión <b style="color:var(--acc2);letter-spacing:.2em">${COD}</b></p></div>`;
+  if(!q){
+    if(body.dataset.vista==='fin') return;
+    body.dataset.vista='fin'; ultimoQid=null; reanimar(body);
+    body.innerHTML=`<div class="ok"><div class="big">🎉</div>
+      <p style="font-size:1.2rem;font-weight:700;margin:.5rem 0">¡Completaste la encuesta!</p>
+      <p style="color:var(--dim)">Gracias por participar. Mirá la pantalla del aula para ver los
+      resultados del curso.</p></div>`;
     return;
   }
 
-  // ¿no le corresponde por su respuesta previa?
-  if(!aplica(q, PID)){
-    if(body.dataset.vista==='na'+idx) return;
-    body.dataset.vista='na'+idx; ultimoIdx=null;
-    body.innerHTML=`<div class="wait"><div style="font-size:2.4rem">↷</div>
-      <p style="font-size:1.05rem;margin-top:.5rem">Esta pregunta no aplica en tu caso</p>
-      <p style="font-size:.88rem">Esperá la siguiente</p></div>`;
-    return;
-  }
-
-  if((DATA.respuestas[q.id]||{})[PID]){
-    if(body.dataset.vista==='ok'+idx) return;
-    body.dataset.vista='ok'+idx; ultimoIdx=null;
-    const priv = q.privada;
-    body.innerHTML=`<div class="ok"><div class="big">✓</div>
-      <p style="font-size:1.15rem;font-weight:700;margin:.5rem 0">Respuesta enviada</p>
-      <p style="color:var(--dim)">${priv?'Queda solo en el registro de la materia':'Mirá la pantalla — tu respuesta ya está ahí'}</p></div>`;
-    return;
-  }
-
-  if(ultimoIdx===idx) return;
-  ultimoIdx=idx; seleccion=[]; anonimo=false; body.dataset.vista='q'+idx;
+  if(ultimoQid===q.id) return;
+  ultimoQid=q.id; seleccion=[]; anonimo=false; body.dataset.vista='q'+q.id; reanimar(body);
 
   body.innerHTML='';
   const h=document.createElement('div'); h.id='aTexto'; h.textContent=q.texto; body.appendChild(h);
@@ -972,7 +1011,12 @@ function pintarAlumno(){
   }
 }
 
-function enviar(q,valor){ sync.responder(q.id,PID,valor); ultimoIdx=null; pintarAlumno(); }
+function enviar(q,valor){
+  // mutación optimista: avanza al toque sin esperar el viaje de ida y vuelta a Firebase
+  DATA.respuestas[q.id] = {...(DATA.respuestas[q.id]||{}), [PID]:{valor, ts:Date.now()}};
+  sync.responder(q.id,PID,valor);
+  ultimoQid=null; pintarAlumno();
+}
 
 /* ===================================================================== */
 await initSync();

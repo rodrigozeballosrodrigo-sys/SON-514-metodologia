@@ -10,6 +10,7 @@
     --acc:#5b8cff; --acc2:#22d3ee; --ok:#34d399; --warn:#fbbf24; --danger:#f87171;
     --f: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -30,20 +31,25 @@
          border:1px solid var(--line); border-radius:1rem; padding:clamp(1rem,2.5vw,1.5rem); margin-bottom:1.1rem}
   .btn{border:1px solid var(--line); background:linear-gradient(180deg,#233059,#1a2444); color:var(--txt);
        padding:.6rem 1rem; border-radius:.6rem; font-size:.92rem; cursor:pointer; font-weight:600;
-       font-family:inherit; transition:.15s}
+       font-family:inherit;
+       transition:transform 120ms var(--ease-out), border-color 150ms var(--ease-out), background 150ms var(--ease-out)}
   .btn:hover{border-color:var(--acc)}
+  .btn:active{transform:scale(0.97)}
   .btn.primary{background:linear-gradient(180deg,#3b6ef5,#2a54c9); border-color:#4d7dff}
   .btn.sm{padding:.4rem .75rem; font-size:.82rem}
   select,input[type=file]{background:#0f1730; border:1px solid var(--line); color:var(--txt);
-       padding:.65rem .8rem; border-radius:.6rem; font-family:inherit; font-size:.95rem; width:100%}
+       padding:.65rem .8rem; border-radius:.6rem; font-family:inherit; font-size:.95rem; width:100%;
+       transition:border-color 150ms var(--ease-out)}
   select:focus{outline:none; border-color:var(--acc)}
   label{display:block; font-size:.75rem; color:var(--dim); text-transform:uppercase;
         letter-spacing:.07em; font-weight:700; margin-bottom:.35rem}
 
   .tabs{display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:1.1rem}
   .tab{padding:.6rem 1rem; border-radius:.6rem; border:1px solid var(--line); background:#141d38;
-       cursor:pointer; font-size:.92rem; font-weight:600; transition:.15s}
+       cursor:pointer; font-size:.92rem; font-weight:600;
+       transition:transform 120ms var(--ease-out), border-color 150ms var(--ease-out), background 150ms var(--ease-out)}
   .tab:hover{border-color:var(--acc)}
+  .tab:active{transform:scale(0.97)}
   .tab.on{background:#23407f; border-color:var(--acc)}
 
   table{border-collapse:collapse; width:100%; font-size:.88rem}
@@ -59,12 +65,15 @@
   .kpi .v{font-size:1.35rem; font-weight:800; letter-spacing:-.02em; color:var(--acc2)}
   .kpi .l{font-size:.7rem; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; margin-top:.1rem}
 
-  details{background:#111a33; border:1px solid var(--line); border-radius:.7rem; margin:.7rem 0}
+  details{background:#111a33; border:1px solid var(--line); border-radius:.7rem; margin:.7rem 0;
+           transition:border-color 150ms var(--ease-out)}
   details>summary{cursor:pointer; padding:.7rem .9rem; font-weight:700; font-size:.9rem; list-style:none; color:var(--acc2)}
   details>summary::-webkit-details-marker{display:none}
-  details>summary::before{content:'▸ '; display:inline-block; transition:.15s}
+  details>summary::before{content:'▸ '; display:inline-block; transition:transform 180ms var(--ease-out)}
   details[open]>summary::before{transform:rotate(90deg)}
-  details .cuerpo{padding:0 .9rem .9rem; font-size:.9rem; line-height:1.6; color:var(--dim)}
+  details .cuerpo{padding:0 .9rem .9rem; font-size:.9rem; line-height:1.6; color:var(--dim);
+           opacity:0; animation:cuerpoIn 200ms var(--ease-out) forwards}
+  @keyframes cuerpoIn{ from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:translateY(0)} }
   details .cuerpo b{color:var(--txt)}
   .formula{font-family:var(--mono); background:#0a1226; border:1px solid var(--line);
            border-radius:.5rem; padding:.7rem .8rem; margin:.5rem 0; font-size:.86rem;
@@ -87,10 +96,40 @@
         color:var(--dim); font-size:.9rem; transition:.15s; cursor:pointer}
   .drop.over{border-color:var(--acc); background:#182246; color:var(--txt)}
   code{font-family:var(--mono); background:#0a1226; padding:.1rem .35rem; border-radius:.3rem; font-size:.88em}
+
+  /* ---------- modal de contraseña ---------- */
+  #gateOverlay{position:fixed; inset:0; z-index:100; display:grid; place-items:center;
+    background:rgba(6,9,20,.72); backdrop-filter:blur(4px); padding:1.2rem}
+  #gateCard{background:linear-gradient(180deg,#182240,#131a30); border:1px solid var(--line);
+    border-radius:1rem; padding:1.6rem; max-width:360px; width:100%;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);
+    opacity:0; transform:translateY(8px) scale(.98); animation:gateIn 220ms var(--ease-out) forwards}
+  @keyframes gateIn{ to{opacity:1; transform:translateY(0) scale(1)} }
+  #gateCard .ic{font-size:2rem; text-align:center; margin-bottom:.3rem}
+  #gateCard h3{margin:.2rem 0 .8rem; text-align:center; font-size:1.05rem; letter-spacing:-.01em}
+  #gateCard input{width:100%; background:#0f1730; border:1px solid var(--line); color:var(--txt);
+    padding:.75rem .9rem; border-radius:.6rem; font-size:1rem; font-family:inherit; letter-spacing:.08em;
+    transition:border-color 150ms var(--ease-out)}
+  #gateCard input:focus{outline:none; border-color:var(--acc)}
+  #gateCard input.error{border-color:var(--danger); animation:gateShake 300ms}
+  @keyframes gateShake{ 20%,60%{transform:translateX(-4px)} 40%,80%{transform:translateX(4px)} }
+  #gateCard button{width:100%; margin-top:.7rem}
+  #gateMsg{color:var(--danger); font-size:.8rem; text-align:center; margin-top:.5rem; min-height:1.1em}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div id="gateOverlay">
+  <div id="gateCard">
+    <div class="ic">🔒</div>
+    <h3>Acceso restringido</h3>
+    <input type="password" id="gatePwd" placeholder="Contraseña" autocomplete="off">
+    <button class="btn primary" id="gateBtn">Entrar</button>
+    <div id="gateMsg"></div>
+  </div>
+</div>
+
+<div class="wrap" id="appWrap" style="display:none">
 
   <header style="margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:flex-start; gap:1rem">
     <div>
@@ -226,12 +265,6 @@
 <script src="estadistica.js"></script>
 <script>
 'use strict';
-// Protección con contraseña
-if(!localStorage.getItem('son514:analisis_ok')){
-  const pwd=prompt('Contraseña para acceder al taller de análisis:','');
-  if(pwd==='CPZT2022'){ localStorage.setItem('son514:analisis_ok','1'); }
-  else{ alert('Acceso denegado'); window.location.href='index.html'; }
-}
 const E = window.Estad;
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -704,13 +737,68 @@ function demo(){
 }
 
 /* =====================================================================
-   EVENTOS
+   EVENTOS  (solo se conectan después de pasar el control de acceso)
    ===================================================================== */
-$('#drop').onclick=()=>$('#file').click();
-$('#file').onchange=e=>{ const f=e.target.files[0]; if(f) leerArchivo(f); };
-['dragenter','dragover'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault(); $('#drop').classList.add('over');}));
-['dragleave','drop'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault(); $('#drop').classList.remove('over');}));
-$('#drop').addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) leerArchivo(f); });
+function arrancarEventos(){
+  $('#drop').onclick=()=>$('#file').click();
+  $('#file').onchange=e=>{ const f=e.target.files[0]; if(f) leerArchivo(f); };
+  ['dragenter','dragover'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault(); $('#drop').classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault(); $('#drop').classList.remove('over');}));
+  $('#drop').addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) leerArchivo(f); });
+
+  // sesiones guardadas en este navegador (modo local de la encuesta)
+  const claves=Object.keys(localStorage).filter(k=>/^son514:[A-Z]{4,8}$/.test(k));
+  if(claves.length) $('#selSesion').innerHTML=claves.map(k=>`<option value="${k}">${k.split(':')[1]}</option>`).join('');
+
+  $('#btnSesion').onclick=()=>{
+    const k=$('#selSesion').value; if(!k) return;
+    try{
+      const d=JSON.parse(localStorage.getItem(k));
+      PREG=[]; FILAS=[];
+      desdeJSON({ preguntas: (window.opener&&window.opener.PREGUNTAS)||PREG_FALLBACK, datos:d });
+      listo('sesión '+k.split(':')[1]);
+    }catch(e){ $('#estadoDatos').innerHTML='<div class="nota aviso">No pude leer esa sesión.</div>'; }
+  };
+  $('#btnDemo').onclick=demo;
+  $('#selUni').onchange=pintarUni;
+  $('#selX').onchange=pintarBi;
+  $('#selY').onchange=pintarBi;
+  $$('.tab').forEach(t=>t.onclick=()=>{
+    $$('.tab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+    $('#vUni').style.display  = t.dataset.v==='uni' ?'block':'none';
+    $('#vBi').style.display   = t.dataset.v==='bi'  ?'block':'none';
+    $('#vGuia').style.display = t.dataset.v==='guia'?'block':'none';
+  });
+}
+
+// definiciones mínimas por si se carga una sesión sin metadatos
+const PREG_FALLBACK=[];
+
+/* ---------- control de acceso (modal propio, no usa prompt()/alert()) ---------- */
+function pasarGate(){
+  $('#gateOverlay').remove();
+  $('#appWrap').style.display='block';
+  arrancarEventos();
+}
+if(localStorage.getItem('son514:analisis_ok')==='1'){
+  $('#appWrap').style.display='block';
+  $('#gateOverlay').remove();
+  arrancarEventos();
+}else{
+  $('#appWrap').style.display='none';
+  const intentar=()=>{
+    const val=$('#gatePwd').value;
+    if(val==='CPZT2022'){ localStorage.setItem('son514:analisis_ok','1'); pasarGate(); }
+    else{
+      $('#gateMsg').textContent='Contraseña incorrecta';
+      $('#gatePwd').classList.remove('error'); void $('#gatePwd').offsetWidth; $('#gatePwd').classList.add('error');
+      $('#gatePwd').value=''; $('#gatePwd').focus();
+    }
+  };
+  $('#gateBtn').onclick=intentar;
+  $('#gatePwd').onkeydown=e=>{ if(e.key==='Enter') intentar(); };
+  setTimeout(()=>$('#gatePwd').focus(),150);
+}
 
 function leerArchivo(f){
   const r=new FileReader();
@@ -726,36 +814,6 @@ function leerArchivo(f){
   };
   r.readAsText(f,'utf-8');
 }
-
-// sesiones guardadas en este navegador (modo local de la encuesta)
-(function(){
-  const claves=Object.keys(localStorage).filter(k=>/^son514:[A-Z]{4,8}$/.test(k));
-  if(!claves.length) return;
-  $('#selSesion').innerHTML=claves.map(k=>`<option value="${k}">${k.split(':')[1]}</option>`).join('');
-})();
-$('#btnSesion').onclick=()=>{
-  const k=$('#selSesion').value; if(!k) return;
-  try{
-    const d=JSON.parse(localStorage.getItem(k));
-    PREG=[]; FILAS=[];
-    // las definiciones viven en index.html; si no están, se infieren del CSV/JSON
-    desdeJSON({ preguntas: (window.opener&&window.opener.PREGUNTAS)||PREG_FALLBACK, datos:d });
-    listo('sesión '+k.split(':')[1]);
-  }catch(e){ $('#estadoDatos').innerHTML='<div class="nota aviso">No pude leer esa sesión.</div>'; }
-};
-$('#btnDemo').onclick=demo;
-$('#selUni').onchange=pintarUni;
-$('#selX').onchange=pintarBi;
-$('#selY').onchange=pintarBi;
-$$('.tab').forEach(t=>t.onclick=()=>{
-  $$('.tab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
-  $('#vUni').style.display  = t.dataset.v==='uni' ?'block':'none';
-  $('#vBi').style.display   = t.dataset.v==='bi'  ?'block':'none';
-  $('#vGuia').style.display = t.dataset.v==='guia'?'block':'none';
-});
-
-// definiciones mínimas por si se carga una sesión sin metadatos
-const PREG_FALLBACK=[];
 </script>
 </body>
 </html>
