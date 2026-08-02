@@ -380,22 +380,22 @@ const CONFIG_FIREBASE = {
 const PREGUNTAS = [
   // ── Bloque A · Datos generales ─────────────────────────────────────
   { id:'edad', bloque:'Datos generales', tipo:'numero', ritmo:'rapida', seg:30,
-    texto:'¿Qué edad tenés?', hint:'Solo el número', min:15, max:80 },
+    texto:'¿Qué edad tienes?', hint:'Solo el número', min:15, max:80 },
 
   { id:'trabaja', bloque:'Datos generales', tipo:'opcion', ritmo:'rapida', seg:30,
     texto:'¿Trabajás actualmente?',
-    opciones:['No, solo estudio','Sí, en algo de sonido','Sí, en otra área'] },
+    opciones:['No','Sí'] },
 
   { id:'donde_trabaja', bloque:'Datos generales', tipo:'texto', ritmo:'rapida', seg:35,
     texto:'¿Dónde trabajás?', hint:'Rubro o lugar, en pocas palabras', max:30,
-    depende:{ id:'trabaja', distintoDe:'No, solo estudio' } },
+    depende:{ id:'trabaja', distintoDe:'No' } },
 
   { id:'ingresos', bloque:'Datos generales', tipo:'opcion', ritmo:'rapida', seg:30, privada:true,
     texto:'¿En qué rango están tus ingresos mensuales?',
     hint:'Rangos amplios · podés no responder · esta respuesta no se proyecta',
     ordinal:true, sinOrden:['Prefiero no responder'],
     opciones:['Menos de Bs 1.500','Bs 1.500 – 3.000','Bs 3.000 – 5.000','Bs 5.000 – 8.000','Más de Bs 8.000','Prefiero no responder'],
-    depende:{ id:'trabaja', distintoDe:'No, solo estudio' } },
+    depende:{ id:'trabaja', distintoDe:'No' } },
 
   { id:'colegio', bloque:'Datos generales', tipo:'texto', ritmo:'rapida', seg:30,
     texto:'¿De qué colegio saliste?', hint:'Nombre corto', max:30 },
@@ -407,7 +407,7 @@ const PREGUNTAS = [
     texto:'¿Era particular o fiscal?', opciones:['Fiscal','Particular','De convenio'] },
 
   { id:'otra_profesion', bloque:'Datos generales', tipo:'opcion', ritmo:'rapida', seg:25,
-    texto:'¿Tenés otra profesión u oficio?', opciones:['No','Sí'] },
+    texto:'¿Tienes otra profesión u oficio?', opciones:['No','Sí'] },
 
   { id:'cual_profesion', bloque:'Datos generales', tipo:'texto', ritmo:'rapida', seg:30,
     texto:'¿Cuál?', hint:'En pocas palabras', max:30,
@@ -415,11 +415,11 @@ const PREGUNTAS = [
 
   // ── Bloque B · Situación personal ──────────────────────────────────
   { id:'vivienda', bloque:'Situación personal', tipo:'opcion', ritmo:'rapida', seg:30,
-    texto:'¿Con quién vivís?',
+    texto:'¿Con quién vives?',
     opciones:['Solo/a','Con mis papás','Con mi pareja / familia propia','Con amigos o compartiendo','Con otros familiares'] },
 
   { id:'familia', bloque:'Situación personal', tipo:'multi', ritmo:'rapida', seg:35, max_sel:3,
-    texto:'¿Ya tenés familia propia?', hint:'Podés marcar más de una',
+    texto:'¿Ya tienes familia propia?', hint:'Podés marcar más de una',
     opciones:['Todavía no','Tengo pareja','Casado/a','Tengo hijos'] },
 
   { id:'personas_cuidado', bloque:'Situación personal', tipo:'numero', ritmo:'rapida', seg:30, privada:true,
@@ -439,17 +439,17 @@ const PREGUNTAS = [
     texto:'¿Para qué usás la IA en tu día a día?', hint:'En pocas palabras — sé honesto/a', max:40 },
 
   { id:'copiar_pegar', bloque:'Tecnología e IA', tipo:'opcion', ritmo:'comentada', seg:100,
-    texto:'Cuando le pedís algo a una IA, ¿copiás y pegás o te detenés a leer?',
+    texto:'Cuando le pides algo a una IA, ¿copias y pegas o te detienes a leer la respuesta?',
     hint:'No hay respuesta correcta — nos sirve para arrancar la materia',
     opciones:['Copio y pego directo','Leo por encima y pego','Leo todo y reescribo','Depende de la urgencia'] },
 
   // ── Bloque D · Cultura y consumo ───────────────────────────────────
   { id:'generos', bloque:'Cultura y consumo', tipo:'multi', ritmo:'rapida', seg:45, max_sel:3,
-    texto:'¿Qué géneros musicales preferís?', hint:'Hasta 3',
+    texto:'¿Qué géneros musicales prefieres?', hint:'Hasta 3',
     opciones:['Rock','Metal','Pop','Hip hop / Rap','Electrónica','Jazz','Clásica','Folklore','Cumbia','Reggaetón','Salsa / Tropical','Otro'] },
 
   { id:'musico', bloque:'Cultura y consumo', tipo:'opcion', ritmo:'rapida', seg:25,
-    texto:'¿Sos músico?', opciones:['Sí, toco un instrumento','Sí, canto','Sí, produzco','No'] },
+    texto:'¿Eres músico?', opciones:['Sí, toco un instrumento','Sí, canto','Sí, produzco','No'] },
 
   { id:'ultimo_libro', bloque:'Cultura y consumo', tipo:'texto', ritmo:'rapida', seg:45,
     texto:'¿Cuál fue el último libro que leíste?', hint:'Título corto · vale "ninguno"', max:36 },
@@ -466,15 +466,13 @@ const PREGUNTAS = [
   { id:'clasica', bloque:'Cultura y consumo', tipo:'opcion', ritmo:'rapida', seg:25,
     texto:'¿Vas a conciertos de música clásica?', ordinal:true, opciones:['Nunca','Alguna vez','Varias veces al año','Seguido'] },
 
-  { id:'entradas', bloque:'Cultura y consumo', tipo:'opcion', ritmo:'rapida', seg:35,
-    texto:'Hablando en general: entre estudiantes de sonido, ¿qué se estila más?',
-    hint:'En tercera persona, sin culpas',
+  { id:'entradas', bloque:'Cultura y consumo', tipo:'opcion', ritmo:'rapida', seg:30,
+    texto:'¿Al acudir a un concierto sueles pagar tu entrada?',
     opciones:['Buscar el pase libre','Depende del bolsillo','Casi siempre se paga la entrada'] },
 
   // ── Bloque E · La carrera y esta materia ───────────────────────────
-  { id:'area_sonido', bloque:'La carrera', tipo:'multi', ritmo:'comentada', seg:110, max_sel:2,
-    texto:'¿Qué área del sonido te interesa más?', hint:'Elegí hasta 2',
-    opciones:['Acústica arquitectónica','Producción musical','Procesamiento de señales','Audio en vivo','Diseño sonoro / medios','Acústica ambiental y ruido','Audio inmersivo / espacial','Restauración y archivo'] },
+  { id:'area_sonido', bloque:'La carrera', tipo:'texto', ritmo:'comentada', seg:100,
+    texto:'¿Qué área del sonido te interesa más?', hint:'En pocas palabras', max:40 },
 
   { id:'porque_carrera', bloque:'La carrera', tipo:'texto', ritmo:'comentada', seg:100,
     texto:'¿Por qué elegiste esta carrera?', hint:'En 1 a 4 palabras', max:34 },
